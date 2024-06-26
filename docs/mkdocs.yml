@@ -1,4 +1,8 @@
 site_name: Visia-Science
+nav:
+  - Home: index.md
+  - About: about.md
 # 
 site_author: José Manuel Ramírez
-# 
+#
+theme: readthedocs
