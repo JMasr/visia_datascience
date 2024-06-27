@@ -4,7 +4,7 @@
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
 
-Project  and explore the Visia clinical try data.
+Project to explore the Visia clinical try data.
 
 ## Project Organization
 
