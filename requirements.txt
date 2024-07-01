@@ -1,14 +1,18 @@
 black
 flake8
+faker~=25.8.0
 ipython
 isort
 jupyterlab
 matplotlib
 mkdocs
 notebook
-numpy
-pandas
+numpy~=2.0.0
+pandas~=2.2.2
 pip
-python-dotenv
+python-dotenv~=1.0.1
 scikit-learn
+pydantic~=2.5.3
+pytest~=7.4.4
 -e .
+
