@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -6,13 +7,14 @@ from pydantic import BaseModel
 
 from visia_science.data import QuestionaryError
 
-SUPPORTED_QUESTIONARIES_EXTENSIONS = ['.csv']
+SUPPORTED_QUESTIONARIES_EXTENSIONS = [".csv"]
 
 
 class BaseQuestionary(ABC, BaseModel):
     path_to_raw_data: Path
     path_to_save_data: Path = None
 
+    q_name: str
     column_with_id: str
     column_with_date: str
     columns_with_items: list
@@ -24,30 +26,40 @@ class BaseQuestionary(ABC, BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def _check_raw_data_file(self):
+    def is_raw_data_file_valid(self) -> None:
         if not self.path_to_raw_data.exists():
-            raise QuestionaryError(f"File '{self.path_to_raw_data}' not found", error_type="FileNotFoundError")
+            raise QuestionaryError(
+                f"File '{self.path_to_raw_data}" f"' not found", error_type="FileNotFoundError"
+            )
         elif not self.path_to_raw_data.is_file():
-            raise QuestionaryError(f"'{self.path_to_raw_data}' is not a file", error_type="NotAFileError")
+            raise QuestionaryError(
+                f"'{self.path_to_raw_data}' is not a file", error_type="NotAFileError"
+            )
         elif self.path_to_raw_data.suffix not in SUPPORTED_QUESTIONARIES_EXTENSIONS:
-            raise QuestionaryError(f"File '{self.path_to_raw_data}' has unsupported extension",
-                                   error_type="UnsupportedExtensionError")
+            raise QuestionaryError(
+                f"File '{self.path_to_raw_data}' has unsupported extension",
+                error_type="UnsupportedExtensionError",
+            )
 
     def load_raw_data(self, loading_arguments: dict = None) -> pd.DataFrame:
         if loading_arguments is None:
             loading_arguments = {}
 
-        self._check_raw_data_file()
+        self.is_raw_data_file_valid()
 
         try:
-            if self.path_to_raw_data.suffix == '.csv':
+            if self.path_to_raw_data.suffix == ".csv":
                 self.df_raw_data = pd.read_csv(self.path_to_raw_data, **loading_arguments)
             else:
-                raise QuestionaryError(f"Unsupported extension {self.path_to_raw_data.suffix}",
-                                       error_type="UnsupportedExtensionError")
+                raise QuestionaryError(
+                    f"Unsupported extension {self.path_to_raw_data.suffix}",
+                    error_type="UnsupportedExtensionError",
+                )
         except Exception as e:
-            raise QuestionaryError(f"Error while reading file {self.path_to_raw_data}: {e}",
-                                   error_type="FileReadError")
+            raise QuestionaryError(
+                f"Error while reading file {self.path_to_raw_data}: {e}",
+                error_type="FileReadError",
+            )
 
         return self.df_raw_data
 
@@ -77,6 +89,22 @@ class BaseQuestionary(ABC, BaseModel):
                 raise QuestionaryError(message, error_type="RuntimeError")
 
         return self.df_post_processed_data
+
+    def save_q_processed(self):
+        if self.df_post_processed_data is None:
+            self.df_post_processed_data = self.df_raw_data
+
+        path_to_save = os.path.join(self.path_to_save_data, f"{self.q_name}_processed.csv")
+        self.df_post_processed_data.to_csv(path_to_save, index=False)
+
+    def get_ids(self):
+        return self.df_raw_data[self.column_with_id].unique()
+
+    def get_scores(self):
+        return self.df_raw_data[self.columns_with_scores]
+
+    def get_items(self):
+        return self.df_raw_data[self.columns_with_items]
 
     @abstractmethod
     def validate(self):
