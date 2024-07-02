@@ -26,26 +26,9 @@ class BaseQuestionary(ABC, BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def is_raw_data_file_valid(self) -> None:
-        if not self.path_to_raw_data.exists():
-            raise QuestionaryError(
-                f"File '{self.path_to_raw_data}" f"' not found", error_type="FileNotFoundError"
-            )
-        elif not self.path_to_raw_data.is_file():
-            raise QuestionaryError(
-                f"'{self.path_to_raw_data}' is not a file", error_type="NotAFileError"
-            )
-        elif self.path_to_raw_data.suffix not in SUPPORTED_QUESTIONARIES_EXTENSIONS:
-            raise QuestionaryError(
-                f"File '{self.path_to_raw_data}' has unsupported extension",
-                error_type="UnsupportedExtensionError",
-            )
-
     def load_raw_data(self, loading_arguments: dict = None) -> pd.DataFrame:
         if loading_arguments is None:
             loading_arguments = {}
-
-        self.is_raw_data_file_valid()
 
         try:
             if self.path_to_raw_data.suffix == ".csv":

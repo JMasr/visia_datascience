@@ -2,25 +2,23 @@ import os
 
 import dotenv
 
+from visia_science.data.make_dataset import download_a_single_file_from_gdrive
 from visia_science.data.questionary import VisiaQuestionary
 from visia_science.files import load_json_as_dict
 
 
 def pipeline_2_process_visia_q(q_path: str, config_path: str, q_process_path: str):
-    visia_raw_q_paths = [os.path.join(q_path, file) for file in os.listdir(q_path)]
     visia_metadata: dict = load_json_as_dict(config_path)
     visia_q_metadata = visia_metadata.get("VISIA_Q")
 
+    # Download data
     for questionary in visia_q_metadata.keys():
-        path_with_q = [
-            path
-            for path in visia_raw_q_paths
-            if visia_q_metadata[questionary]["q_name"].lower() in path
-        ]
-        visia_q_metadata[questionary]["q_path"] = path_with_q[0]
+        raw_data_url = visia_q_metadata[questionary]["q_url"]
+        raw_data_path = os.path.join(q_path, questionary)
+        download_a_single_file_from_gdrive(gdrive_url=raw_data_url, output_path=raw_data_path)
 
         visia_q = VisiaQuestionary(
-            path_to_raw_data=visia_q_metadata[questionary]["q_path"],
+            path_to_raw_data=raw_data_path,
             path_to_save_data=q_process_path,
             q_name=visia_q_metadata[questionary]["q_name"],
             column_with_id=visia_q_metadata[questionary]["column_with_id"],
@@ -43,9 +41,6 @@ if __name__ == "__main__":
     VISIA_Q_PROCESS_PATH = os.getenv("VISIA_Q_PROCESS_PATH")
     print(f"Experiment name: {exp_name}")
 
-
-    raw_data_name_2_urls = dict_config["raw_data_urls"]
-    download_list = raw_data_name_2_urls.values()
-    download_paths = [os.path.join(DEFAULT_RAW_DATA_PATH, file_name) for file_name in raw_data_name_2_urls.keys()]
-
-    download_a_list_of_files_from_gdrive(download_list, download_paths)
+    pipeline_2_process_visia_q(
+        q_path=VISIA_Q_PATH, config_path=CONFIG_PATH, q_process_path=VISIA_Q_PROCESS_PATH
+    )

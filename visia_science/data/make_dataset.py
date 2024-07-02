@@ -2,6 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path
+from typing import List
 
 import gdown
 from tqdm import tqdm
@@ -18,7 +19,7 @@ def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> boo
     Returns:
     bool: True if the download is successful, False otherwise.
     """
-    if not re.match(r'^https:\/\/drive\.google\.com\/.*', gdrive_url):
+    if not re.match(r"^https:\/\/drive\.google\.com\/.*", gdrive_url):
         logging.error("Invalid Google Drive URL format")
         return False
 
@@ -36,9 +37,7 @@ def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> boo
     return True
 
 
-def download_a_list_of_files_from_gdrive(
-        gdrive_urls: list[str], output_paths: list[str]
-) -> bool:
+def download_a_list_of_files_from_gdrive(gdrive_urls: List[str], output_paths: List[str]) -> bool:
     """
     Download a list of files from Google Drive and save them to local paths.
     :param gdrive_urls: List of Google Drive URLs to download the files from.

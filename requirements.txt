@@ -16,5 +16,3 @@ pydantic
 pytest
 gdown
 tqdm
-
--e .

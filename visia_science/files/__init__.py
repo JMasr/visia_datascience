@@ -22,7 +22,6 @@ def load_json_as_dict(path: str) -> dict:
         with open(path, "r") as file:
             json_as_dict = json.load(file)
     except Exception as e:
-        message = f"Error loading JSON file: {e}"
-        json_as_dict = {}
+        raise RuntimeError(f"Error loading JSON file: {e}")
 
     return json_as_dict
