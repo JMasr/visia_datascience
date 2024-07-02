@@ -43,4 +43,9 @@ if __name__ == "__main__":
     VISIA_Q_PROCESS_PATH = os.getenv("VISIA_Q_PROCESS_PATH")
     print(f"Experiment name: {exp_name}")
 
-    pipeline_2_process_visia_q(VISIA_Q_PATH, CONFIG_PATH, VISIA_Q_PROCESS_PATH)
+
+    raw_data_name_2_urls = dict_config["raw_data_urls"]
+    download_list = raw_data_name_2_urls.values()
+    download_paths = [os.path.join(DEFAULT_RAW_DATA_PATH, file_name) for file_name in raw_data_name_2_urls.keys()]
+
+    download_a_list_of_files_from_gdrive(download_list, download_paths)

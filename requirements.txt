@@ -14,5 +14,7 @@ python-dotenv
 scikit-learn
 pydantic
 pytest
--e .
+gdown
+tqdm
 
+-e .
