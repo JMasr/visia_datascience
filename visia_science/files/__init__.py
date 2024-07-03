@@ -19,7 +19,7 @@ def load_json_as_dict(path: str) -> dict:
         raise ValueError(f"File {path} is not a valid JSON file")
 
     try:
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             json_as_dict = json.load(file)
     except Exception as e:
         raise RuntimeError(f"Error loading JSON file: {e}")
