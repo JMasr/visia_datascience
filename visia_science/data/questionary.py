@@ -1,5 +1,7 @@
+import locale
 import os
 from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -97,10 +99,55 @@ class BaseQuestionary(ABC, BaseModel):
     def extract_metadata(self):
         pass
 
+    @abstractmethod
+    def clean(self):
+        pass
 
-class VisiaQuestionary(BaseQuestionary):
+
+class VisiaQuestionary(BaseQuestionary, ABC):
+    DATE_TIME_FORMAT: str = "%b %d, %Y @ %I:%M %p"
+    MONTH_MAPPING_ENG_SP: dict = {
+        "Jan": "Ene",
+        "Feb": "Feb",
+        "Mar": "Mar",
+        "Apr": "Abr",
+        "May": "May",
+        "Jun": "Jun",
+        "Jul": "Jul",
+        "Aug": "Ago",
+        "Sep": "Sep",
+        "Oct": "Oct",
+        "Nov": "Nov",
+        "Dec": "Dic",
+    }
+    MONTH_MAPPING_SP_ENG: dict = {v: k for k, v in MONTH_MAPPING_ENG_SP.items()}
+
     def validate(self):
         pass
 
     def extract_metadata(self):
         pass
+
+    def clean(self):
+        df_ = self.df_raw_data.copy()
+
+        for date_string in df_[self.column_with_date]:
+            # Change month using the mapping
+            date_string = date_string.replace(
+                date_string[:3], self.MONTH_MAPPING_SP_ENG[date_string[:3]]
+            )
+            date_object = datetime.strptime(date_string, "%b %d, %Y @ %I:%M %p")
+
+            df_[self.column_with_date] = df_[self.column_with_date].replace(
+                date_string, date_object
+            )
+
+        df_[self.column_with_date] = pd.to_datetime(df_[self.column_with_date])
+
+        # Reset locale to default
+        locale.resetlocale(locale.LC_TIME)
+        # Eliminate rows without values in the columns with items
+        df_ = df_.dropna(subset=self.columns_with_items)
+
+        # Eliminate rows without values in the columns with scores
+        df_ = df_.dropna(subset=self.columns_with_scores)
