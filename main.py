@@ -1,7 +1,10 @@
+import datetime
 import os
 
 import dotenv
+import pandas
 
+from visia_science import app_logger
 from visia_science.data.make_dataset import download_a_single_file_from_gdrive
 from visia_science.data.questionary import VisiaQuestionary
 from visia_science.files import load_json_as_dict
@@ -12,15 +15,15 @@ def pipeline_get_visia_q(q_path: str, config_path: str, q_process_path: str) -> 
     visia_q_metadata = visia_metadata.get("VISIA_Q")
 
     # Download data
-    visia_questionaries = []
+    questionaries = []
     for questionary in visia_q_metadata.keys():
         raw_data_url = visia_q_metadata[questionary]["q_url"]
         raw_data_path = os.path.join(q_path, questionary)
-        is_file_donwload = download_a_single_file_from_gdrive(
+        is_file_download = download_a_single_file_from_gdrive(
             gdrive_url=raw_data_url, output_path=raw_data_path
         )
 
-        if not is_file_donwload:
+        if not is_file_download:
             raise ValueError(f"Failed to download {questionary} from {raw_data_url}")
 
         visia_q = VisiaQuestionary(
@@ -34,8 +37,20 @@ def pipeline_get_visia_q(q_path: str, config_path: str, q_process_path: str) -> 
         )
         visia_q.load_raw_data()
         visia_q.save_q_processed()
-        visia_questionaries.append(visia_q)
-    return visia_questionaries
+        questionaries.append(visia_q)
+    return questionaries
+
+
+def remove_visia_q_entries_from_a_given_date(visia_q: pandas.DataFrame, date: datetime.date) -> pandas.DataFrame:
+    # TODO: Test this function
+    visia_q = visia_q[visia_q["date"] >= date]
+    return visia_q
+
+
+def remove_visia_q_entries_that_dont_match_a_given_id_formatt(visia_q: pandas.DataFrame) -> pandas.DataFrame:
+    # TODO: Test this function
+    visia_q = visia_q[visia_q["id"].str.contains("CUNQ-", "CHOX")]
+    return visia_q
 
 
 def pipeline_clean_visia_q(visia_q: list) -> list:
@@ -49,11 +64,11 @@ if __name__ == "__main__":
     dotenv_path = os.path.join(project_dir, ".env")
     dotenv.load_dotenv(dotenv_path)
 
-    exp_name = os.getenv("EXP_NAME")
+    EXP_NAME = os.getenv("EXP_NAME")
     CONFIG_PATH = os.getenv("CONFIG_PATH")
     VISIA_Q_PATH = os.getenv("VISIA_Q_PATH")
     VISIA_Q_PROCESS_PATH = os.getenv("VISIA_Q_PROCESS_PATH")
-    print(f"Experiment name: {exp_name}")
+    app_logger = app_logger.info(f"Starting pipeline for {EXP_NAME}")
 
     visia_questionaries = pipeline_get_visia_q(
         q_path=VISIA_Q_PATH, config_path=CONFIG_PATH, q_process_path=VISIA_Q_PROCESS_PATH
