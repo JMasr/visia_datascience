@@ -1,7 +1,7 @@
 {
   "VISIA_Q": {
     "forminator-ebip-q-ecip-q-ov-240626094517.csv": {
-      "q_name": "EBIP-Q",
+      "q_name": "EBIP",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -18,33 +18,8 @@
         "10. He dicho a otras personas palabras malsonantes sobre alguien",
         "11. He amenazado a alguien",
         "12. He robado o estropeado algo de alguien",
-        "13. He excluido o ignorado a alguien,Observaciones EBIP-Q",
-        "14. He difundido rumores sobre alguien",
-        "1. Alguien me ha dicho palabras malsonantes o me ha insultado usando el email o SMS",
-        "2. Alguien ha dicho a otros palabras malsonantes sobre mi usando internet o SMS",
-        "3. Alguien me ha amenazado a través de mensajes en internet o SMS",
-        "4. Alguien ha pirateado mi cuenta de correo y ha sacado mi información personal (por ejemplo, a través de mi email o red social)",
-        "5. Alguien ha pirateado mi cuenta y se ha hecho pasar por mi (a través de mensajería instantánea o cuentas en las redes sociales)",
-        "6. Alguien ha creado una cuenta falsa para hacerse pasar por mi (Facebook o MSN)",
-        "7. Alguien ha colgado información personal sobre mí en internet",
-        "O7. La distancia entre Madrid y Barcelona es mayor que entre Madrid y Nueva York.",
-        "8. Alguien ha colgado vídeos o fotos comprometidas mías en internet",
-        "9. Alguien ha retocado fotos mías que yo había colgado en internet",
-        "10. He sido exlcuído o ignorado de una red social o de chat",
-        "11. Alguien ha difundido rumores sobre mí por internet",
-        "12. He dicho palabras malsonantes sobre alguien o le he insultado usando SMS o mensajes en internet",
-        "13. He dicho palabras malsonantes sobre alguien a otras personas en mensajes por internet o por SMS",
-        "14. He amenazado a alguien a través de SMS o mensajes en internet",
-        "15. He pirateado la cuenta de correo de alguien y he robado su información personal (email o red social)",
-        "16. He pirateado la cuenta de alguien y me he hecho pasar por él/ella (mensajería instantánea o cuenta en red social)",
-        "17. He creado una cuenta falsa para hacerme pasar por otra persona (Facebook o MSN)",
-        "18. He colgado información personal de alguien en internet",
-        "O8. Hay personas a las que se le dan bien los idiomas.",
-        "19. He colgado videos o fotos comprometidas de alguien en internet",
-        "20. He retocado fotos o vídeos de alguien que estaban colgados en internet",
-        "21. He excluido o ignorado a alguien en una red social o chat",
-        "22. He difundido rumores sobre alguien en internet",
-        "Observaciones ECIP-Q"
+        "13. He excluido o ignorado a alguien",
+        "Observaciones EBIP-Q"
       ],
       "columns_with_scores": [
         "OV",
@@ -81,7 +56,8 @@
         "19. He colgado videos o fotos comprometidas de alguien en internet",
         "20. He retocado fotos o vídeos de alguien que estaban colgados en internet",
         "21. He excluido o ignorado a alguien en una red social o chat",
-        "22. He difundido rumores sobre alguien en internet"
+        "22. He difundido rumores sobre alguien en internet",
+        "Observaciones ECIP-Q"
       ],
       "columns_with_scores": [
         "OV",
