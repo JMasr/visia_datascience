@@ -130,17 +130,16 @@ class VisiaQuestionary(BaseQuestionary, ABC):
     def clean(self):
         df_ = self.df_raw_data.copy()
 
-        # Clean DataTime column
-        for date_string in df_[self.column_with_date]:
+        for index, date_string in df_[self.column_with_date].items():
             # Change month using the mapping
             date_string_eng = date_string.replace(
                 date_string[:3], self.MONTH_MAPPING_SP_ENG[date_string[:3]]
             )
             date_object = datetime.strptime(date_string_eng, "%b %d, %Y @ %I:%M %p")
 
-            df_[self.column_with_date] = df_[self.column_with_date].replace(
-                date_string, date_object
-            )
+            # Update the date column with the new date
+            df_.loc[index, self.column_with_date] = date_object
+
         df_[self.column_with_date] = pd.to_datetime(df_[self.column_with_date])
 
         # Check columns with NaN values
@@ -153,3 +152,8 @@ class VisiaQuestionary(BaseQuestionary, ABC):
                 df_[column] = df_[column].fillna("No answer")
 
         self.df_raw_data = df_
+
+    def process_using_functions(self, functions: list = lambda x: x):
+        for function_to_applied in functions:
+            self.df_raw_data = function_to_applied(self.df_raw_data)
+        return self.df_raw_data
