@@ -22,22 +22,21 @@ def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> boo
     bool: True if the download is successful, False otherwise.
     """
     if Path(output_path).exists():
-        logging.warning(f"File {output_path} already exists")
+        app_logger.warning(f"DOWNLOADER - File {output_path} already exists")
         return True
 
     if not re.match(r"^https:\/\/drive\.google\.com\/.*", gdrive_url):
-        logging.error("Invalid Google Drive URL format")
+        app_logger.error("DOWNLOADER - Invalid Google Drive URL format")
         return False
 
     if not Path(output_path).parent.exists():
-        logging.warning(f"Output directory {Path(output_path).parent} does not exist")
+        app_logger.warning(f"DOWNLOADER - Output directory {Path(output_path).parent} does not exist")
         os.makedirs(Path(output_path).parent, exist_ok=True)
 
     try:
         gdown.download(gdrive_url, output_path, quiet=False)
     except Exception as e:
-        app_logger.error(f"Failed to download from {gdrive_url}")
-        app_logger.error(f"Error: {e}")
+        app_logger.error(f"DOWNLOADER - Failed to download from {gdrive_url}: {e}")
         return False
 
     return True
