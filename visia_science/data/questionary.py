@@ -1,4 +1,3 @@
-import locale
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime
@@ -131,23 +130,26 @@ class VisiaQuestionary(BaseQuestionary, ABC):
     def clean(self):
         df_ = self.df_raw_data.copy()
 
+        # Clean DataTime column
         for date_string in df_[self.column_with_date]:
             # Change month using the mapping
-            date_string = date_string.replace(
+            date_string_eng = date_string.replace(
                 date_string[:3], self.MONTH_MAPPING_SP_ENG[date_string[:3]]
             )
-            date_object = datetime.strptime(date_string, "%b %d, %Y @ %I:%M %p")
+            date_object = datetime.strptime(date_string_eng, "%b %d, %Y @ %I:%M %p")
 
             df_[self.column_with_date] = df_[self.column_with_date].replace(
                 date_string, date_object
             )
-
         df_[self.column_with_date] = pd.to_datetime(df_[self.column_with_date])
 
-        # Reset locale to default
-        locale.resetlocale(locale.LC_TIME)
-        # Eliminate rows without values in the columns with items
-        df_ = df_.dropna(subset=self.columns_with_items)
+        # Check columns with NaN values
+        columns_with_nan = df_.columns[df_.isna().any()].tolist()
+        # Fill NaN values with -1 if the column is a score column and with "No answer" if it is an item column
+        for column in columns_with_nan:
+            if column in self.columns_with_scores:
+                df_[column] = df_[column].fillna(-1)
+            else:
+                df_[column] = df_[column].fillna("No answer")
 
-        # Eliminate rows without values in the columns with scores
-        df_ = df_.dropna(subset=self.columns_with_scores)
+        self.df_raw_data = df_

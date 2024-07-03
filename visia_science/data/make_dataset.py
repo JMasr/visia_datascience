@@ -7,6 +7,8 @@ from typing import List
 import gdown
 from tqdm import tqdm
 
+from visia_science import app_logger
+
 
 def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> bool:
     """
@@ -19,6 +21,10 @@ def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> boo
     Returns:
     bool: True if the download is successful, False otherwise.
     """
+    if Path(output_path).exists():
+        logging.warning(f"File {output_path} already exists")
+        return True
+
     if not re.match(r"^https:\/\/drive\.google\.com\/.*", gdrive_url):
         logging.error("Invalid Google Drive URL format")
         return False
@@ -30,8 +36,8 @@ def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> boo
     try:
         gdown.download(gdrive_url, output_path, quiet=False)
     except Exception as e:
-        logging.error(f"Failed to download from {gdrive_url}")
-        logging.error(f"Error: {e}")
+        app_logger.error(f"Failed to download from {gdrive_url}")
+        app_logger.error(f"Error: {e}")
         return False
 
     return True

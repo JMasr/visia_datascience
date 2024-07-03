@@ -16,7 +16,12 @@ def pipeline_get_visia_q(q_path: str, config_path: str, q_process_path: str) -> 
     for questionary in visia_q_metadata.keys():
         raw_data_url = visia_q_metadata[questionary]["q_url"]
         raw_data_path = os.path.join(q_path, questionary)
-        download_a_single_file_from_gdrive(gdrive_url=raw_data_url, output_path=raw_data_path)
+        is_file_donwload = download_a_single_file_from_gdrive(
+            gdrive_url=raw_data_url, output_path=raw_data_path
+        )
+
+        if not is_file_donwload:
+            raise ValueError(f"Failed to download {questionary} from {raw_data_url}")
 
         visia_q = VisiaQuestionary(
             path_to_raw_data=raw_data_path,
