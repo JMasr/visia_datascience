@@ -1,6 +1,6 @@
 {
   "VISIA_Q": {
-    "forminator-ebip-q-ecip-q-ov-240626094517.csv": {
+    "forminator-ebip-q-ecip-q-ov.csv": {
       "q_name": "EBIP",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
@@ -28,7 +28,7 @@
       ],
       "q_url": "https://drive.google.com/uc?id=127kXtMICVxYMRb2oTGALPlPyLC1nnIEN"
     },
-    "forminator-ebip-q-ecip-q-ov-240626094517.csv": {
+    "forminator-ebip-q-ecip-q-ov.csv": {
       "q_name": "ECIP",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
@@ -66,7 +66,7 @@
       ],
       "q_url": "https://drive.google.com/uc?id=127kXtMICVxYMRb2oTGALPlPyLC1nnIEN"
     },
-    "forminator-eupi-a-ov-240626094612.csv": {
+    "forminator-eupi-a-ov.csv": {
       "q_name": "EUPI",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
@@ -91,7 +91,7 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1zr-l3nQhCcxyHnG-BJsYlipEkvWGxb2F"
     },
-    "forminator-maci-ii-ov-240626094444.csv": {
+    "forminator-maci-ii-ov.csv": {
       "q_name": "MACI-II",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
@@ -107,7 +107,6 @@
         "8A Resentido",
         "8B Agraviado",
         "9 Tendencia límite",
-        "FF Tendencia suicida",
         "1 Invalidez",
         "2 Inconsistencia",
         "2 Pensamientos suicidas",
@@ -115,11 +114,12 @@
         "Observaciones"
       ],
       "columns_with_scores": [
-        "OV"
+        "OV",
+        "FF Tendencia suicida"
       ],
       "q_url": "https://drive.google.com/uc?id=12nBIx3cc63afnP5IZrrYD09gNqAjobP8"
     },
-    "forminator-mfq-ov-240626094536.csv": {
+    "forminator-mfq-ov.csv": {
       "q_name": "MFQ",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
@@ -168,7 +168,7 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1h7RwL5rPQajy8zNOn5gYNmbGhH8hesau"
     },
-    "forminator-paykel-ov-240626094554.csv": {
+    "forminator-paykel-ov.csv": {
       "q_name": "PAYKEL",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
@@ -189,7 +189,7 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1ekOKWhoJ3TnoRCQzbw4gmPvib2KUWGQX"
     },
-    "forminator-sdq-ov-240626094631.csv": {
+    "forminator-sdq-ov.csv": {
       "q_name": "SDQ",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
@@ -236,8 +236,21 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1ht_nC6qW2TBSoT1JCm6EPlj-ukj5WxJi"
     },
-    "forminator-vsc-240626094647.csv": {
-      "q_name": "vsc",
+    "forminator-preguntas-4-2-ov.csv": {
+      "q_name": "PREGUNTAS",
+      "column_with_id": "crd",
+      "column_with_date": "Hora de envío",
+      "columns_with_items": [
+        "¿Puedes decirnos cómo eres? ¿Cómo te ves a tí mismo/a?",
+        "¿Cómo crees que te ven los demás?"
+      ],
+      "columns_with_scores": [
+        "ov"
+      ],
+      "q_url": "https://drive.google.com/uc?id=1FX1WDUzFjbZrfINf-GHdDxaTEYZ7fXDT"
+    },
+    "forminator-vsc.csv": {
+      "q_name": "VSC",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -249,8 +262,7 @@
         "Grupo clínico",
         "Diagnóstico",
         "Tratamiento",
-        "Checkbox",
-        "user_id"
+        "Checkbox"
       ],
       "columns_with_scores": [],
       "q_url": "https://drive.google.com/uc?id=1Bw1OVDlH8W7ucvZGx6K5d66aMOt1LeOV"
