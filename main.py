@@ -5,7 +5,12 @@ import pandas as pd
 
 from visia_science import app_logger
 from visia_science.data.make_dataset import download_a_single_file_from_gdrive
-from visia_science.data.patient import Patient, return_education_level, return_sex, return_visia_group
+from visia_science.data.patient import (
+    Patient,
+    return_education_level,
+    return_sex,
+    return_visia_group,
+)
 from visia_science.data.questionary import VisiaQuestionary
 from visia_science.files import load_json_as_dict
 
@@ -98,6 +103,67 @@ def pipeline_get_visia_patients(visia_q_with_patients: VisiaQuestionary) -> dict
     return visia_output_patients
 
 
+def integrate_questionaries_with_patients(
+    patients_with_interest: dict, questionaries_with_interest: dict, path_to_save: str
+) -> pd.DataFrame:
+    patient_with_all_responses, df_patient_with_all_responses = [], pd.DataFrame()
+    for patient_id, patient_object in patients_with_interest.items():
+        # Patient data as DataFrame
+        df_with_patients = pd.DataFrame(patient_object.model_dump(), index=[0])
+
+        # Get all the responses of the patient as DataFrame
+        q_responses_of_a_patient, df_q_responses_of_a_patient = [], pd.DataFrame()
+        for questionary_name, questionary_obj in questionaries_with_interest.items():
+            q_response_of_patient: pd.DataFrame = (
+                questionary_obj.get_all_the_responses_of_one_patient(patient_id)
+            )
+
+            # Drop columns that are not needed id
+            q_response_of_patient = q_response_of_patient.drop(
+                columns=[questionary_obj.column_with_id]
+            )
+
+            # Add q-name to each column
+            q_response_of_patient.columns = [
+                f"{questionary_name} - {column}" for column in q_response_of_patient.columns
+            ]
+
+            # Add to each row the df_patient
+            q_response_of_patient.reset_index(drop=True, inplace=True)
+            q_response_of_patient = pd.merge(
+                df_with_patients, q_response_of_patient, left_index=True, right_index=True
+            )
+            q_responses_of_a_patient.append(q_response_of_patient)
+
+        # Concatenate all the responses of the patient into a single DataFrame
+        df_q_responses_of_a_patient = pd.concat(q_responses_of_a_patient, axis=1)
+        df_q_responses_of_a_patient.reset_index(drop=True, inplace=True)
+        patient_with_all_responses.append(df_q_responses_of_a_patient)
+
+    df_patient_with_all_responses = pd.concat(patient_with_all_responses, ignore_index=True)
+
+    # Remove all the duplicated columns
+    df_patient_with_all_responses = df_patient_with_all_responses.loc[
+        :, ~df_patient_with_all_responses.columns.duplicated()
+    ]
+
+    # Replace all the NaN values in a string column with "No answer"
+    for column in df_patient_with_all_responses.columns:
+        if df_patient_with_all_responses[column].dtype in ["object", "string"]:
+            df_patient_with_all_responses[column] = df_patient_with_all_responses[column].fillna(
+                "No answer"
+            )
+        elif df_patient_with_all_responses[column].dtype in ["int", "float"]:
+            df_patient_with_all_responses[column] = df_patient_with_all_responses[column].fillna(0)
+        else:
+            df_patient_with_all_responses[column] = df_patient_with_all_responses[column].fillna(
+                "UNK"
+            )
+
+    df_patient_with_all_responses.to_csv(path_to_save, index=False)
+    return df_patient_with_all_responses
+
+
 if __name__ == "__main__":
     project_dir = os.path.join(os.path.dirname(__file__))
     dotenv_path = os.path.join(project_dir, ".env")
@@ -119,8 +185,12 @@ if __name__ == "__main__":
 
     # Add number of words to the questionary PREGUNTAS
     visia_q_preguntas: VisiaQuestionary = visia_questionaries.get("PREGUNTAS")
-    visia_q_preguntas.add_number_of_word_of_a_columns_into_questionary("¿Puedes decirnos cómo eres? ¿Cómo te ves a tí mismo/a?")
-    visia_q_preguntas.add_number_of_word_of_a_columns_into_questionary("¿Cómo crees que te ven los demás?")
+    visia_q_preguntas.add_number_of_word_of_a_columns_into_questionary(
+        "¿Puedes decirnos cómo eres? ¿Cómo te ves a tí mismo/a?"
+    )
+    visia_q_preguntas.add_number_of_word_of_a_columns_into_questionary(
+        "¿Cómo crees que te ven los demás?"
+    )
 
     visia_questionaries["PREGUNTAS"] = visia_q_preguntas
     visia_q_preguntas.save_q_processed()
@@ -128,45 +198,9 @@ if __name__ == "__main__":
     visia_q_patients: VisiaQuestionary = visia_questionaries.pop("VSC")
     visia_all_patients: dict = pipeline_get_visia_patients(visia_q_patients)
 
-    visia_patient_with_all_responses = []
-    for patient_id, patient in visia_all_patients.items():
-        # Patient data as DataFrame
-        df_patient = pd.DataFrame(patient.model_dump(), index=[0])
-
-        # Get all the responses of the patient as DataFrame
-        visia_ = []
-        for visia_q_name, visia_q in visia_questionaries.items():
-            visia_q_response_of_patient: pd.DataFrame = visia_q.get_all_the_responses_of_one_patient(patient_id)
-
-            # Drop columns that are not needed id
-            visia_q_response_of_patient = visia_q_response_of_patient.drop(columns=[visia_q.column_with_id])
-
-            # Add q-name to each column
-            visia_q_response_of_patient.columns = [f"{visia_q_name} - {column}" for column in visia_q_response_of_patient.columns]
-
-            # Add to each row the df_patient
-            visia_q_response_of_patient.reset_index(drop=True, inplace=True)
-            visia_q_response_of_patient = pd.merge(df_patient, visia_q_response_of_patient, left_index=True, right_index=True)
-            visia_.append(visia_q_response_of_patient)
-
-        # Concatenate all the responses of the patient into a single DataFrame
-        visia_df = pd.concat(visia_, axis=1)
-        visia_df.reset_index(drop=True, inplace=True)
-        visia_patient_with_all_responses.append(visia_df)
-
-    visia_all_patients_df = pd.concat(visia_patient_with_all_responses, ignore_index=True)
-
-    # Remove all the duplicated columns
-    visia_all_patients_df = visia_all_patients_df.loc[:,~visia_all_patients_df.columns.duplicated()]
-
-    # Replace all the NaN values in a string column with "No answer"
-    for column in visia_all_patients_df.columns:
-        if visia_all_patients_df[column].dtype in ["object", "string"]:
-            visia_all_patients_df[column] = visia_all_patients_df[column].fillna("No answer")
-        elif visia_all_patients_df[column].dtype in ["int", "float"]:
-            visia_all_patients_df[column] = visia_all_patients_df[column].fillna(0)
-        else:
-            visia_all_patients_df[column] = visia_all_patients_df[column].fillna("UNK")
-
-    visia_all_patients_df.to_csv(os.path.join(VISIA_Q_PROCESS_PATH, "VISIA_CRDs.csv"), index=False)
+    integrate_questionaries_with_patients(
+        visia_all_patients,
+        visia_questionaries,
+        os.path.join(VISIA_Q_PROCESS_PATH, "VISIA_ALL.csv"),
+    )
     app_logger.info(f"Pipeline finished for {EXP_NAME}")
