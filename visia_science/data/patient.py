@@ -1,11 +1,6 @@
-from datetime import date
 from enum import Enum
 
-import pandas as pd
-from pandas import DataFrame
 from pydantic import BaseModel
-
-from visia_science.data.questionary import VisiaQuestionary
 
 
 class VisiaGroup(Enum):

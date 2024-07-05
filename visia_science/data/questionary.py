@@ -35,9 +35,9 @@ class BaseQuestionary(ABC, BaseModel):
 
         # Remove columns that are not in columns_with_items or columns_with_scores
         columns_to_keep = (
-                self.columns_with_items
-                + self.columns_with_scores
-                + [self.column_with_id, self.column_with_date]
+            self.columns_with_items
+            + self.columns_with_scores
+            + [self.column_with_id, self.column_with_date]
         )
         columns_to_drop = [
             col for col in df_with_desired_columns.columns if col not in columns_to_keep
@@ -79,14 +79,14 @@ class BaseQuestionary(ABC, BaseModel):
 
     @staticmethod
     def _standardize_datetime(
-            date_string: str, month_mapping: dict, date_time_format: str
+        date_string: str, month_mapping: dict, date_time_format: str
     ) -> datetime:
         date_string_desire = date_string.replace(date_string[:3], month_mapping[date_string[:3]])
         date_object = datetime.strptime(date_string_desire, date_time_format)
         return date_object
 
     def _standardize_date_column_to_datetime(
-            self, df_with_dates: pd.DataFrame, month_mapping: dict, date_time_format: str
+        self, df_with_dates: pd.DataFrame, month_mapping: dict, date_time_format: str
     ) -> pd.DataFrame:
         for index, date_string in df_with_dates[self.column_with_date].items():
             date_object = self._standardize_datetime(date_string, month_mapping, date_time_format)
@@ -113,7 +113,7 @@ class BaseQuestionary(ABC, BaseModel):
         return df_with_empty_values
 
     def _remove_entries_from_a_given_date(
-            self, df_with_q: pd.DataFrame, column_with_date: str = None, date: str = None
+        self, df_with_q: pd.DataFrame, column_with_date: str = None, date: str = None
     ) -> pd.DataFrame:
         if column_with_date is None:
             column_with_date = self.column_with_date
@@ -127,7 +127,7 @@ class BaseQuestionary(ABC, BaseModel):
         return df_with_q
 
     def remove_entries_that_dont_match_a_given_id_format(
-            self, df_with_q: pd.DataFrame, column_with_id: str = None, id_formats: list = None
+        self, df_with_q: pd.DataFrame, column_with_id: str = None, id_formats: list = None
     ) -> pd.DataFrame:
         if column_with_id is None:
             column_with_id = self.column_with_id
@@ -142,8 +142,7 @@ class BaseQuestionary(ABC, BaseModel):
             final_visia_q = pd.concat([final_visia_q, visia_q_with_format_i])
         return final_visia_q
 
-    def add_number_of_word_of_a_columns_into_questionary(self,
-                                                         column_to_count: str) -> bool:
+    def add_number_of_word_of_a_columns_into_questionary(self, column_to_count: str) -> bool:
         self.create_simple_post_processed_if_dont_exits()
         if column_to_count not in self.df_post_processed_data.columns:
             app_logger.warning(
@@ -172,7 +171,9 @@ class BaseQuestionary(ABC, BaseModel):
             app_logger.error(f"Questionary - Error while adding the number of words: {e}")
             return False
         except Exception as e:
-            app_logger.error(f"Questionary - Unexpected error while adding the number of words: {e}")
+            app_logger.error(
+                f"Questionary - Unexpected error while adding the number of words: {e}"
+            )
             return False
 
         return True
@@ -332,4 +333,6 @@ class VisiaQuestionary(BaseQuestionary, ABC):
         self.df_post_processed_data = df_
 
     def get_all_the_responses_of_one_patient(self, id_patient: str):
-        return self.df_post_processed_data[self.df_post_processed_data[self.column_with_id] == id_patient]
+        return self.df_post_processed_data[
+            self.df_post_processed_data[self.column_with_id] == id_patient
+        ]

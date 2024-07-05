@@ -30,7 +30,9 @@ def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> boo
         return False
 
     if not Path(output_path).parent.exists():
-        app_logger.warning(f"DOWNLOADER - Output directory {Path(output_path).parent} does not exist")
+        app_logger.warning(
+            f"DOWNLOADER - Output directory {Path(output_path).parent} does not exist"
+        )
         os.makedirs(Path(output_path).parent, exist_ok=True)
 
     try:

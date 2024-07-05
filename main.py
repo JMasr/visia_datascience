@@ -59,16 +59,16 @@ def pipeline_clean_visia_q(visia_q: list) -> dict:
     return cleaned_visia_q
 
 
-def pipeline_add_info_to_visia_q(visia_q: dict,
-                                 columns_to_count: list = None) -> dict:
+def pipeline_add_info_to_visia_q(visia_q: dict, columns_to_count: list = None) -> dict:
     if columns_to_count is None:
-        columns_to_count = ["¿Puedes decirnos cómo eres? ¿Cómo te ves a tí mismo/a?", "¿Cómo crees que te ven los demás?"]
+        columns_to_count = [
+            "¿Puedes decirnos cómo eres? ¿Cómo te ves a tí mismo/a?",
+            "¿Cómo crees que te ven los demás?",
+        ]
 
     visia_q_preguntas: VisiaQuestionary = visia_q.get("PREGUNTAS")
     for column in columns_to_count:
-        visia_q_preguntas.add_number_of_word_of_a_columns_into_questionary(
-            column
-        )
+        visia_q_preguntas.add_number_of_word_of_a_columns_into_questionary(column)
 
     visia_q["PREGUNTAS"] = visia_q_preguntas
     visia_q_preguntas.save_q_processed()
@@ -121,7 +121,7 @@ def pipeline_get_visia_patients(visia_q_with_patients: VisiaQuestionary) -> dict
 
 
 def integrate_questionaries_with_patients(
-        patients_with_interest: dict, questionaries_with_interest: dict, path_to_save: str
+    patients_with_interest: dict, questionaries_with_interest: dict, path_to_save: str
 ) -> pd.DataFrame:
     patient_with_all_responses, df_patient_with_all_responses = [], pd.DataFrame()
     for patient_id, patient_object in patients_with_interest.items():
@@ -161,8 +161,8 @@ def integrate_questionaries_with_patients(
 
     # Remove all the duplicated columns
     df_patient_with_all_responses = df_patient_with_all_responses.loc[
-                                    :, ~df_patient_with_all_responses.columns.duplicated()
-                                    ]
+        :, ~df_patient_with_all_responses.columns.duplicated()
+    ]
 
     # Replace all the NaN values in a string column with "No answer"
     for column in df_patient_with_all_responses.columns:

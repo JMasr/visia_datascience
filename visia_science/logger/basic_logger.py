@@ -20,20 +20,18 @@ class LogTypes(Enum):
 
 class BasicLogger:
     def __init__(
-            self,
-            log_file: str,
-            log_name: str = "Generic_Logger",
-            max_log_size: int = (5 * 1024 * 1024),
-            backup_count: int = 3,
+        self,
+        log_file: str,
+        log_name: str = "Generic_Logger",
+        max_log_size: int = (5 * 1024 * 1024),
+        backup_count: int = 3,
     ):
         self.logger = logging.getLogger(log_name)
 
         if not self.logger.handlers:
             # Create a formatter to add the time, name, level and message of the log
             self.logger.setLevel(logging.DEBUG)
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
             # Create a file handler to store logs in a file
             os.makedirs(os.path.dirname(log_file), exist_ok=True)
