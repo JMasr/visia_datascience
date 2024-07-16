@@ -26,8 +26,7 @@ def download_a_single_file_from_gdrive(gdrive_url: str, output_path: str) -> boo
         return True
 
     if not re.match(r"^https:\/\/drive\.google\.com\/.*", gdrive_url):
-        app_logger.error("DOWNLOADER - Invalid Google Drive URL format")
-        return False
+        gdrive_url = f"https://drive.google.com/uc?id={gdrive_url}"
 
     if not Path(output_path).parent.exists():
         app_logger.warning(
