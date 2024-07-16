@@ -30,7 +30,7 @@ class TestQuestionaryShould:
     def setup_class(cls):
         # Create a temporary folder
         cls.temp_folder = ROOT_TEST_PATH / "temp_folder"
-        os.mkdir(cls.temp_folder)
+        os.makedirs(cls.temp_folder, exist_ok=True)
         # Create a temporary CSV file for testing
         cls.temp_file = ROOT_TEST_PATH / "temp.csv"
         cls.mock_questionary = mock_a_questionary_as_dataframe()
