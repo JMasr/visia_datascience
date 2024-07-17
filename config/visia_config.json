@@ -1,7 +1,8 @@
 {
   "VISIA_Q": {
-    "forminator-ebip-q-ecip-q-ov.csv": {
+    "EBIP": {
       "q_name": "EBIP",
+      "q_file": "forminator-ebip-q-ecip-q-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -28,8 +29,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=127kXtMICVxYMRb2oTGALPlPyLC1nnIEN"
     },
-    "forminator-ebip-q-ecip-q-ov.csv": {
+    "ECIP": {
       "q_name": "ECIP",
+      "q_file": "forminator-ebip-q-ecip-q-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -66,8 +68,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=127kXtMICVxYMRb2oTGALPlPyLC1nnIEN"
     },
-    "forminator-eupi-a-ov.csv": {
+    "EUPI": {
       "q_name": "EUPI",
+      "q_file": "forminator-eupi-a-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -91,8 +94,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1zr-l3nQhCcxyHnG-BJsYlipEkvWGxb2F"
     },
-    "forminator-maci-ii-ov.csv": {
+    "MACI-II": {
       "q_name": "MACI-II",
+      "q_file": "forminator-maci-ii-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -119,8 +123,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=12nBIx3cc63afnP5IZrrYD09gNqAjobP8"
     },
-    "forminator-mfq-ov.csv": {
+    "MFQ": {
       "q_name": "MFQ",
+      "q_file": "forminator-mfq-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -168,8 +173,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1h7RwL5rPQajy8zNOn5gYNmbGhH8hesau"
     },
-    "forminator-paykel-ov.csv": {
+    "PAYKEL": {
       "q_name": "PAYKEL",
+      "q_file": "forminator-paykel-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -189,8 +195,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1ekOKWhoJ3TnoRCQzbw4gmPvib2KUWGQX"
     },
-    "forminator-sdq-ov.csv": {
+    "SDQ": {
       "q_name": "SDQ",
+      "q_file": "forminator-sdq-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -236,8 +243,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1ht_nC6qW2TBSoT1JCm6EPlj-ukj5WxJi"
     },
-    "forminator-preguntas-4-2-ov.csv": {
+    "PREGUNTAS": {
       "q_name": "PREGUNTAS",
+      "q_file": "forminator-preguntas-ov.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -249,8 +257,9 @@
       ],
       "q_url": "https://drive.google.com/uc?id=1FX1WDUzFjbZrfINf-GHdDxaTEYZ7fXDT"
     },
-    "forminator-vsc.csv": {
+    "VSC": {
       "q_name": "VSC",
+      "q_file": "forminator-vsc.csv",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
