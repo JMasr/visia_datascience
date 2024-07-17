@@ -1,5 +1,4 @@
 import os
-from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 
@@ -13,7 +12,7 @@ from visia_science.files import load_json_as_dict, save_dict_as_json
 SUPPORTED_QUESTIONARIES_EXTENSIONS = [".csv"]
 
 
-class BaseQuestionary(ABC, BaseModel):
+class BaseQuestionary(BaseModel):
     path_to_raw_data: Path
     path_to_save_data: Path = None
 
@@ -240,20 +239,8 @@ class BaseQuestionary(ABC, BaseModel):
     def get_items(self):
         return self.df_raw_data[self.columns_with_items]
 
-    @abstractmethod
-    def validate(self, **kwargs):
-        pass
 
-    @abstractmethod
-    def extract_metadata(self):
-        pass
-
-    @abstractmethod
-    def clean(self):
-        pass
-
-
-class VisiaQuestionary(BaseQuestionary, ABC):
+class VisiaQuestionary(BaseQuestionary):
     ID_WITH_WRONG_FORMAT: dict = None
 
     DATE_TIME_FORMAT: str = "%b %d, %Y @ %I:%M %p"
