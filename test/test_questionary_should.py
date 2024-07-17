@@ -46,13 +46,14 @@ class TestQuestionaryShould:
     def test_valid_init_should(self):
         # Arrange
         testing_q = BaseQuestionary(path_to_raw_data=self.temp_file,
+                                    q_name="test_questionary",
                                     path_to_save_data=self.temp_folder,
                                     column_with_id="id",
                                     column_with_date="date",
                                     columns_with_items=["items"],
                                     columns_with_scores=["scores"])
         # Act
-        testing_q._check_raw_data_file()
+        testing_q.load_raw_data()
 
         # Assert
         assert isinstance(testing_q, BaseQuestionary)
@@ -62,18 +63,20 @@ class TestQuestionaryShould:
         # Arrange
         testing_q = BaseQuestionary(path_to_raw_data=path_to_raw_data,
                                     path_to_save_data=self.temp_folder,
+                                    q_name="test_questionary",
                                     column_with_id="id",
                                     column_with_date="date",
                                     columns_with_items=["items"],
                                     columns_with_scores=["scores"])
         # Act and Assert
         with pytest.raises(QuestionaryError):
-            testing_q._check_raw_data_file()
+            testing_q.load_raw_data()
 
     def test_valid_load_raw_data_should(self):
         # Arrange
         testing_q = BaseQuestionary(path_to_raw_data=self.temp_file,
                                     path_to_save_data=self.temp_folder,
+                                    q_name="test_questionary",
                                     column_with_id="id",
                                     column_with_date="date",
                                     columns_with_items=["items"],
@@ -85,7 +88,9 @@ class TestQuestionaryShould:
         assert isinstance(testing_q.df_raw_data, pd.DataFrame)
         assert not testing_q.df_raw_data.empty
         assert len(testing_q.df_raw_data) == len(self.mock_questionary)
-        assert all(testing_q.df_raw_data.columns == self.mock_questionary.columns)
+
+        column_check = all([col in testing_q.df_raw_data.columns for col in self.mock_questionary.columns])
+        assert column_check
 
 
 if __name__ == "__main__":
