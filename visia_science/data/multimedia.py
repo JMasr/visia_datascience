@@ -165,14 +165,15 @@ class Multimedia(BaseModel):
                 )
         return validation_response
 
-    def transcribe_multimedia(self, language="es") -> dict:
+    def transcribe(self, language="es") -> BasicResponse:
         if language == "en":
             model = whisper.load_model("base.en")
         else:
             model = whisper.load_model("large")
-
-        decode_options = {"language": language}
-        result = model.transcribe(self.path_to_raw_data, decode_options)
+        try:
+            result = model.transcribe(str(self.path_to_raw_data))
+        except Exception as e:
+            return BasicResponse(success=False, status_code=500, message=str(e))
 
         self.transcription = result["text"]
-        return result
+        return DataResponse(success=True, status_code=200, message="Transcription successful", data=result)
