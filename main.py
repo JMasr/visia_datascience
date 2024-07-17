@@ -23,7 +23,7 @@ def pipeline_get_visia_q(q_path: str, config_path: str, q_process_path: str) -> 
     questionaries = []
     for questionary in visia_q_metadata.keys():
         raw_data_url = visia_q_metadata[questionary]["q_url"]
-        raw_data_path = os.path.join(q_path, questionary)
+        raw_data_path = os.path.join(q_path, visia_q_metadata[questionary]["q_file"])
         is_file_download = download_a_single_file_from_gdrive(
             gdrive_url=raw_data_url, output_path=raw_data_path
         )
