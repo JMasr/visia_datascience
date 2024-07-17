@@ -83,7 +83,7 @@ class TestQuestionaryShould:
                 path_to_save_data=self.temp_folder)
 
             # Act
-            transcribe_audio_response = audio.transcribe_multimedia(language="en")
+            transcribe_audio_response = audio.transcribe(language="en")
 
             # Assert
             assert transcribe_audio_response.success is True
