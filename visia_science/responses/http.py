@@ -1,3 +1,4 @@
+import pandas as pd
 from pydantic import BaseModel, Field
 
 from visia_science import app_logger
@@ -59,3 +60,10 @@ class ListResponse(BasicResponse):
 
 class DataResponse(BasicResponse):
     data: dict
+
+
+class DataFrameResponse(BasicResponse):
+    data: pd.DataFrame
+
+    class Config:
+        arbitrary_types_allowed = True
