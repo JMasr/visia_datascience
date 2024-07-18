@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from visia_science import app_logger
 from visia_science.data import QuestionaryError
+from visia_science.data.multimedia import Multimedia
 from visia_science.files import load_json_as_dict, save_dict_as_json
 
 SUPPORTED_QUESTIONARIES_EXTENSIONS = [".csv"]
@@ -34,9 +35,9 @@ class BaseQuestionary(BaseModel):
 
         # Remove columns that are not in columns_with_items or columns_with_scores
         columns_to_keep = (
-            self.columns_with_items
-            + self.columns_with_scores
-            + [self.column_with_id, self.column_with_date]
+                self.columns_with_items
+                + self.columns_with_scores
+                + [self.column_with_id, self.column_with_date]
         )
         columns_to_drop = [
             col for col in df_with_desired_columns.columns if col not in columns_to_keep
@@ -78,14 +79,14 @@ class BaseQuestionary(BaseModel):
 
     @staticmethod
     def _standardize_datetime(
-        date_string: str, month_mapping: dict, date_time_format: str
+            date_string: str, month_mapping: dict, date_time_format: str
     ) -> datetime:
         date_string_desire = date_string.replace(date_string[:3], month_mapping[date_string[:3]])
         date_object = datetime.strptime(date_string_desire, date_time_format)
         return date_object
 
     def _standardize_date_column_to_datetime(
-        self, df_with_dates: pd.DataFrame, month_mapping: dict, date_time_format: str
+            self, df_with_dates: pd.DataFrame, month_mapping: dict, date_time_format: str
     ) -> pd.DataFrame:
         for index, date_string in df_with_dates[self.column_with_date].items():
             date_object = self._standardize_datetime(date_string, month_mapping, date_time_format)
@@ -112,7 +113,7 @@ class BaseQuestionary(BaseModel):
         return df_with_empty_values
 
     def _remove_entries_from_a_given_date(
-        self, df_with_q: pd.DataFrame, column_with_date: str = None, date: str = None
+            self, df_with_q: pd.DataFrame, column_with_date: str = None, date: str = None
     ) -> pd.DataFrame:
         if column_with_date is None:
             column_with_date = self.column_with_date
@@ -126,7 +127,7 @@ class BaseQuestionary(BaseModel):
         return df_with_q
 
     def remove_entries_that_dont_match_a_given_id_format(
-        self, df_with_q: pd.DataFrame, column_with_id: str = None, id_formats: list = None
+            self, df_with_q: pd.DataFrame, column_with_id: str = None, id_formats: list = None
     ) -> pd.DataFrame:
         if column_with_id is None:
             column_with_id = self.column_with_id
@@ -266,14 +267,34 @@ class VisiaQuestionary(BaseQuestionary):
     def extract_metadata(self):
         pass
 
-    def _standardize_ids(self, df_with_ids, id_examples: str = "CUNQ-0"):
+    def _load_json_with_wrong_ids(self) -> dict:
         path_to_ids_with_wrong_format = os.path.join(
-            os.path.dirname(self.path_to_raw_data), "visia_ids_with_wrong_format.json"
+            os.path.dirname(self.path_to_raw_data),
+            "visia_ids_with_wrong_format.json"
         )
-        if self.ID_WITH_WRONG_FORMAT is None:
-            self.ID_WITH_WRONG_FORMAT = load_json_as_dict(path_to_ids_with_wrong_format)
+
+        try:
+            if self.ID_WITH_WRONG_FORMAT is None:
+                dict_with_wrong_ids = load_json_as_dict(path_to_ids_with_wrong_format)
+                app_logger.info("Questionary - Loaded the json with wrong IDs")
+            else:
+                dict_with_wrong_ids = self.ID_WITH_WRONG_FORMAT
+        except Exception as e:
+            app_logger.warning(f"Questionary - Error while creating the json with wrong IDs: {e}")
+            app_logger.info("Questionary - Creating a empty json with wrong IDs")
+            save_dict_as_json({}, path_to_ids_with_wrong_format)
+            dict_with_wrong_ids = {}
+
+        return dict_with_wrong_ids
+
+    def _standardize_ids(self, df_with_ids, id_examples: str = "CUNQ-0"):
+        self.ID_WITH_WRONG_FORMAT = self._load_json_with_wrong_ids()
 
         # Check if the IDs are in the correct format
+        path_to_ids_with_wrong_format = os.path.join(
+            os.path.dirname(self.path_to_raw_data),
+            "visia_ids_with_wrong_format.json"
+        )
         for index, raw_id in df_with_ids[self.column_with_id].items():
             if not raw_id.startswith(id_examples):
                 # Check if the ID is already in the wrong format
@@ -322,4 +343,5 @@ class VisiaQuestionary(BaseQuestionary):
     def get_all_the_responses_of_one_patient(self, id_patient: str):
         return self.df_post_processed_data[
             self.df_post_processed_data[self.column_with_id] == id_patient
-        ]
+            ]
+
