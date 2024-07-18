@@ -2,6 +2,7 @@ import os
 import shutil
 from pathlib import Path
 
+import pandas as pd
 import pytest
 import torchaudio
 
@@ -75,6 +76,25 @@ class TestQuestionaryShould:
             # Assert
             assert load_audio_response.success is True
 
+    def test_calculate_audio_quality(self, yesno_file_paths):
+        # Arrange
+        for file_path in yesno_file_paths:
+            audio = Multimedia(
+                path_to_raw_data=file_path,
+                path_to_save_data=self.temp_folder)
+
+            # Act
+            audio_quality = audio.calculate_audio_quality()
+            audio_quality.log_response(module="Multimedia", action="CalculateAudioQuality")
+
+            # Assert
+            assert audio_quality is not None
+
+            audio_quality_data = audio_quality.data
+            for key in audio_quality_data.keys():
+                quality_parameter = audio_quality_data[key]
+                assert quality_parameter is not None
+
     def test_transcribe_multimedia_should(self, yesno_file_paths):  # Inject the fixture
         # Arrange
         for file_path in yesno_file_paths:
@@ -92,6 +112,24 @@ class TestQuestionaryShould:
             transcription = transcribe_audio_response.data.get("text")
             assert transcription is not None
             assert len(transcription) > 0
+
+    def test_multimedia_as_questionary_should(self, yesno_file_paths):
+        # Arrange
+        for file_path in yesno_file_paths:
+            audio = Multimedia(
+                path_to_raw_data=file_path,
+                path_to_save_data=self.temp_folder)
+            audio.load_multimedia()
+            audio.transcribe(language="en")
+            audio.calculate_audio_quality()
+
+            # Act
+            audio_as_questionary_response = audio.get_metadata_as_dataframe()
+
+            # Assert
+            assert audio_as_questionary_response.success is True
+            assert audio_as_questionary_response.data is not None
+            assert isinstance(audio_as_questionary_response.data, pd.DataFrame)
 
 
 if __name__ == "__main__":
