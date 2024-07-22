@@ -192,9 +192,8 @@ class Multimedia(BaseModel):
             validation_data = validation_response.data
             return validation_data.get("streams")[0].get("codec_type") == "video"
 
-    @staticmethod
     def _standardize_multimedia_metadata(
-            input_metadata: dict,
+            self, input_metadata: dict,
     ) -> dict:  # Assuming a unique stream for audio and video
         # Standardize metadata using ffmpeg format info
         multimedia_metadata = {
@@ -215,7 +214,8 @@ class Multimedia(BaseModel):
                 stream_processed = preprocess_video_ffmpeg_stream(stream_unk)
                 multimedia_metadata.update(stream_processed)
             else:
-                message = "No audio or video stream found in metadata. Skipping stream."
+                message = (f"No audio or video stream found in metadata."
+                           f" Skipping stream {self.path_to_raw_data} file")
                 app_logger.error(message)
 
         return multimedia_metadata
