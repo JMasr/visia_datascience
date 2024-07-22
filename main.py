@@ -4,6 +4,7 @@ import dotenv
 
 from visia_science import app_logger
 from visia_science.data.multimedia import Multimedia
+from visia_science.responses.http import BasicResponse
 
 if __name__ == "__main__":
     # Load environment variables
@@ -36,20 +37,12 @@ if __name__ == "__main__":
             path_to_save_data=VISIA_V_PROCESS_PATH
         )
 
-        load_video_response = None
         try:
-            load_video_response = visia_video.load_multimedia()
-            load_video_response.log_response(module="Multimedia", action="LoadRawData")
-        except Exception as e:
-            app_logger.error(f"Error loading multimedia data: {e}")
+            metadata_video: BasicResponse = visia_video.get_metadata_as_dataframe()
+            metadata_video.log_response("Video Pipeline", "GetMetadata")
 
-        if load_video_response.success:
-            try:
-                video_response = visia_video.transcribe()
-                video_response.log_response(module="Multimedia", action="Transcribe")
-            except Exception as e:
-                app_logger.error(f"Error transcribing multimedia data: {e}")
-        else:
-            app_logger.error(f"Error loading multimedia data: {load_video_response.message}")
+            metadata_video_df = metadata_video.data
+        except Exception as e:
+            app_logger.error(f"Error processing video {video_file_path}: {e}")
 
         app_logger.info(f"Video {video_file_path} processed successfully")
