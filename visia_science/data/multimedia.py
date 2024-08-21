@@ -195,10 +195,12 @@ class Multimedia(BaseModel):
     def _standardize_multimedia_metadata(
             self, input_metadata: dict,
     ) -> dict:  # Assuming a unique stream for audio and video
+        file_id = Path(input_metadata["format"]["filename"]).stem
         # Standardize metadata using ffmpeg format info
         multimedia_metadata = {
+            "file_id": file_id,
+            "id": file_id.split("_")[0],
             "file_path": input_metadata["format"]["filename"],
-            "file_id": Path(input_metadata["format"]["filename"]).stem,
             "date_created": input_metadata["format"].get("tags", {}).get("creation_time", None),
             "format_name": input_metadata["format"]["format_name"],
             "size(bytes)": input_metadata["format"]["size"],
