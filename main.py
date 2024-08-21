@@ -3,8 +3,8 @@ import os
 import dotenv
 
 from visia_science import app_logger
-from visia_science.data.multimedia import Multimedia
-from visia_science.responses.http import BasicResponse
+from visia_science.pipelines.questionaries import visia_questionaries_pipeline
+from visia_science.pipelines.videos import pipeline_videos, merge_processed_qv
 
 if __name__ == "__main__":
     # Load environment variables
@@ -23,26 +23,15 @@ if __name__ == "__main__":
     VISIA_V_PROCESS_PATH = os.getenv("VIDEO_PROCESS_PATH")
 
     app_logger.info(f"Starting pipeline for {EXP_PATH}")
-    # visia_questionaries_pipeline(
-    #     exp_name=EXP_NAME,
-    #     q_path=VISIA_Q_PATH,
-    #     config_path=CONFIG_PATH,
-    #     q_process_path=VISIA_Q_PROCESS_PATH,
-    # )
+    visia_q_processed = visia_questionaries_pipeline(
+        exp_name=EXP_NAME,
+        q_path=VISIA_Q_PATH,
+        config_path=CONFIG_PATH,
+        q_process_path=VISIA_Q_PROCESS_PATH,
+    )
 
-    for video_file_path in os.listdir(VISIA_V_PATH):
-        video_file_path = os.path.join(VISIA_V_PATH, video_file_path)
-        visia_video = Multimedia(
-            path_to_raw_data=video_file_path,
-            path_to_save_data=VISIA_V_PROCESS_PATH
-        )
+    visia_v_processed = pipeline_videos(path_to_raw_video=VISIA_V_PATH,
+                                        path_to_save_processed_video=VISIA_V_PROCESS_PATH)
 
-        try:
-            metadata_video: BasicResponse = visia_video.get_metadata_as_dataframe()
-            metadata_video.log_response("Video Pipeline", "GetMetadata")
-
-            metadata_video_df = metadata_video.data
-        except Exception as e:
-            app_logger.error(f"Error processing video {video_file_path}: {e}")
-
-        app_logger.info(f"Video {video_file_path} processed successfully")
+    # Merge processed questionaries and videos
+    visia_qv_processed = merge_processed_qv(visia_q_processed, visia_v_processed)
