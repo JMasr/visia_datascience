@@ -71,6 +71,27 @@ def pipeline_add_info_to_visia_q(visia_q: dict, columns_to_count: list = None) -
 
 
 def pipeline_get_visia_patients(visia_q_with_patients: VisiaQuestionary) -> dict:
+    """
+    This function processes a VisiaQuestionary object to extract patient data, calculate their age,
+    and standardize certain fields. It returns a dictionary of Patient objects.
+
+    Flow
+    ----
+    1. Initialize an empty dictionary to store patient data
+    2. Iterate over each row in the post-processed DataFrame
+    3. Calculate the patient's age from their birthdate
+    4. Standardize the education level, clinical group, and biological sex fields
+    5. Create a Patient object for each row and add it to the dictionary
+    6. Save the updated DataFrame and return the dictionary of patients
+
+    Example Usage
+    -------------
+        visia_q = VisiaQuestionary(...)
+        patients_dict = pipeline_get_visia_patients(visia_q)
+
+    :param visia_q_with_patients: A VisiaQuestionary object containing post-processed data
+    :return: A dictionary where keys are patient IDs and values are Patient objects
+    """
     visia_output_patients: dict = {}
 
     df_patient: pd.DataFrame = visia_q_with_patients.df_post_processed_data
@@ -115,8 +136,37 @@ def pipeline_get_visia_patients(visia_q_with_patients: VisiaQuestionary) -> dict
 
 
 def integrate_questionaries_with_patients(
-    patients_with_interest: dict, questionaries_with_interest: dict, path_to_save: str
-) -> pd.DataFrame:
+        patients_with_interest: dict, questionaries_with_interest: dict) -> pd.DataFrame:
+    """
+    This function integrates patient data with their corresponding questionnaire responses into a single DataFrame.
+    It processes each patient's data and their responses, merges them,
+    and ensures no duplicate columns while handling missing values appropriately.
+
+    Flow
+    ----
+    1. Initialize empty lists and DataFrames for storing patient responses.
+    2. Iterate over each patient and convert their data to a DataFrame.
+    3. For each questionnaire, get the patient's responses, drop unnecessary columns, and merge with patient data.
+    4. Concatenate all responses for each patient into a single DataFrame.
+    5. Remove duplicate columns and handle missing values.
+
+    Example Usage
+    -------------
+        patients = {
+            "patient_1": Patient(...),
+            "patient_2": Patient(...)
+        }
+        questionaries = {
+            "questionary_1": VisiaQuestionary(...),
+            "questionary_2": VisiaQuestionary(...)
+        }
+        result_df = integrate_questionaries_with_patients(patients, questionaries)
+        print(result_df)
+
+    :param patients_with_interest: A dict where keys are patient IDs and values are patient objects
+    :param questionaries_with_interest:  A dict where keys are questionnaire names and values are questionnaire objects
+    :return: Returns a DataFrame containing integrated patient data and their questionnaire responses
+    """
     patient_with_all_responses, df_patient_with_all_responses = [], pd.DataFrame()
     for patient_id, patient_object in patients_with_interest.items():
         # Patient data as DataFrame
@@ -155,8 +205,8 @@ def integrate_questionaries_with_patients(
 
     # Remove all the duplicated columns
     df_patient_with_all_responses = df_patient_with_all_responses.loc[
-        :, ~df_patient_with_all_responses.columns.duplicated()
-    ]
+                                    :, ~df_patient_with_all_responses.columns.duplicated()
+                                    ]
 
     # Replace all the NaN values in a string column with "No answer"
     for column in df_patient_with_all_responses.columns:
@@ -171,26 +221,52 @@ def integrate_questionaries_with_patients(
                 "UNK"
             )
 
-    df_patient_with_all_responses.to_csv(path_to_save, index=False)
     return df_patient_with_all_responses
 
 
 def visia_questionaries_pipeline(exp_name: str, q_path: str, config_path: str, q_process_path: str):
-    # Get questionaries
-    visia_questionaries: list = pipeline_get_visia_q(
-        q_path=q_path, config_path=config_path, q_process_path=q_process_path
-    )
-    # Clean questionaries
-    visia_questionaries: dict = pipeline_clean_visia_q(visia_questionaries)
-    # Add info to questionaries
-    visia_questionaries: dict = pipeline_add_info_to_visia_q(visia_questionaries)
-    # Get patients
-    visia_q_patients: VisiaQuestionary = visia_questionaries.pop("VSC")
-    visia_all_patients: dict = pipeline_get_visia_patients(visia_q_patients)
-    # Integrate questionaries with patients
-    integrate_questionaries_with_patients(
-        visia_all_patients,
-        visia_questionaries,
-        os.path.join(q_process_path, f"{exp_name}_Q_CRDs.csv"),
-    )
-    app_logger.info(f"Pipeline finished for {exp_name}")
+    """
+    This function orchestrates the entire pipeline for processing Visia questionaries.
+    It downloads, cleans, and enriches the questionaries, extracts patient data, and integrates the questionaries with
+     patient information, saving the final dataset to a CSV file.
+
+    Flow
+    ----
+    1. Calls pipeline_get_visia_q to download and load raw questionaries.
+    2. Cleans the questionaries using pipeline_clean_visia_q.
+    3. Adds additional information to the questionaries with pipeline_add_info_to_visia_q.
+    4. Extracts patient data from the questionaries using pipeline_get_visia_patients.
+    5. Integrates the questionaries with patient data and saves the result to a CSV file.
+
+    :param exp_name: The name of the experiment
+    :param q_path: The path where the raw questionaries are stored
+    :param config_path: The path to the configuration file containing metadata
+    :param q_process_path: The path where processed questionaries will be saved.
+    :return: a df containing the integrated questionaries and patient data.
+    """
+    try:
+        # Get questionaries
+        visia_questionaries: list = pipeline_get_visia_q(
+            q_path=q_path, config_path=config_path, q_process_path=q_process_path
+        )
+        # Clean questionaries
+        visia_questionaries: dict = pipeline_clean_visia_q(visia_questionaries)
+        # Add info to questionaries
+        visia_questionaries: dict = pipeline_add_info_to_visia_q(visia_questionaries)
+        # Get patients
+        visia_q_patients: VisiaQuestionary = visia_questionaries.pop("VSC")
+        visia_all_patients: dict = pipeline_get_visia_patients(visia_q_patients)
+        # Integrate questionaries with patients
+        visia_patient_with_all_responses = integrate_questionaries_with_patients(
+            visia_all_patients,
+            visia_questionaries)
+        # Save the processed questionaries
+        path_to_save = os.path.join(q_process_path, f"{exp_name}_Q_CRDs.csv")
+        visia_patient_with_all_responses.to_csv(path_to_save, index=False)
+
+        app_logger.info(f"Pipeline finished for {exp_name}")
+    except Exception as e:
+        app_logger.error(f"Error processing pipeline for {exp_name}: {e}")
+        visia_patient_with_all_responses = pd.DataFrame()
+
+    return visia_patient_with_all_responses
