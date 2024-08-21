@@ -1,5 +1,4 @@
 import os
-import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -27,8 +26,8 @@ class TestQuestionaryShould:
 
     @classmethod
     def teardown_class(cls):
-        """Remove the temporary folder after testing manually to avoid Google Drive API quota limit"""
-        shutil.rmtree(cls.temp_folder, ignore_errors=True)
+        """Remove the temporary folder after testing manually to avoid quota limit of downloading YESNO dataset."""
+        # shutil.rmtree(cls.temp_folder, ignore_errors=True)
 
     @pytest.fixture(scope="class")
     def yesno_file_paths(self, num_audios=2):
