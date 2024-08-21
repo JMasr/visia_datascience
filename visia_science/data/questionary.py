@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 from visia_science import app_logger
 from visia_science.data import QuestionaryError
-from visia_science.data.multimedia import Multimedia
 from visia_science.files import load_json_as_dict, save_dict_as_json
 
 SUPPORTED_QUESTIONARIES_EXTENSIONS = [".csv"]
