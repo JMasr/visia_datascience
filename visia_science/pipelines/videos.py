@@ -50,7 +50,7 @@ def pipeline_videos(path_to_raw_video: str, path_to_save_processed_video: str):
     return df_metadata_all_videos
 
 
-def merge_processed_qv(processed_q: pd.DataFrame, processed_v: pd.DataFrame) -> pd.DataFrame:
+def merge_processed_qv(processed_q: pd.DataFrame, processed_v: pd.DataFrame, path_to_save: str) -> pd.DataFrame:
     """
     Populate the questionaries dataframe with the videos information when the 'id' is the same in both dataframes.
 
@@ -65,4 +65,6 @@ def merge_processed_qv(processed_q: pd.DataFrame, processed_v: pd.DataFrame) -> 
     processed_q["video_count"] = processed_q["id"].map(processed_v["id"].value_counts()).fillna(0)
     # Get the total duration of videos of id in processed_q
     processed_q["video_duration"] = processed_q["id"].map(processed_v.groupby("id")["audio-duration"].sum()).fillna(0)
+
+    processed_q.to_csv(os.path.join(path_to_save, "VISIA_QV_CRD.csv"), index=False)
     return processed_q
