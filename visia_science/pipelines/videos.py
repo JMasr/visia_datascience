@@ -52,14 +52,19 @@ def pipeline_videos(path_to_raw_video: str, path_to_save_processed_video: str):
 
 def merge_processed_qv(processed_q: pd.DataFrame, processed_v: pd.DataFrame, path_to_save: str) -> pd.DataFrame:
     """
-    Populate the questionaries dataframe with the videos information when the 'id' is the same in both dataframes.
+    This function merges the processed questionaries and videos DataFrames, calculates the number of videos, and the
+    total duration of videos for each questionary.
 
-    Args:
-        processed_q (pd.DataFrame): Processed questionaries.
-        processed_v (pd.DataFrame): Processed videos.
+    Flow
+    ----
+    1. Calculate the number of videos for each questionary.
+    2. Calculate the total duration of videos for each questionary.
+    3. Save the merged DataFrame to a CSV file.
 
-    Returns:
-        pd.DataFrame: Merged processed questionaries and videos.
+    :param processed_q: The processed questionaries DataFrame
+    :param processed_v: The processed videos DataFrame
+    :param path_to_save: The directory path where the merged DataFrame will be saved
+    :return: The merged DataFrame
     """
     # Get the numbers of videos of id in processed_q and put 0 if there is no video
     processed_q["video_count"] = processed_q["id"].map(processed_v["id"].value_counts()).fillna(0)
