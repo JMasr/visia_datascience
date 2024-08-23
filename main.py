@@ -7,11 +7,12 @@ from visia_science.pipelines.questionaries import visia_questionaries_pipeline
 from visia_science.pipelines.videos import pipeline_videos, merge_processed_qv
 
 if __name__ == "__main__":
-    # Load environment variables
+    app_logger.info("Load environment variables")
     project_dir = os.path.join(os.path.dirname(__file__))
     dotenv_path = os.path.join(project_dir, ".env")
     dotenv.load_dotenv(dotenv_path)
-    # Get environment variables
+
+    app_logger.info("Load environment variables")
     EXP_NAME = os.getenv("EXP_NAME")
     EXP_PATH = os.getenv("EXP_PATH")
     CONFIG_PATH = os.getenv("CONFIG_PATH")
@@ -30,10 +31,13 @@ if __name__ == "__main__":
         q_process_path=VISIA_Q_PROCESS_PATH,
     )
 
+    app_logger.info("Starting video pipeline")
+    # TODO: Test the pipeline_videos function when there are videos corrupted or empty
     visia_v_processed = pipeline_videos(
         path_to_raw_video=VISIA_V_PATH, path_to_save_processed_video=VISIA_V_PROCESS_PATH
     )
 
+    app_logger.info("Merging processed questionaries and videos")
     visia_qv_processed = merge_processed_qv(
         processed_q=visia_q_processed,
         processed_v=visia_v_processed,
