@@ -30,8 +30,12 @@ if __name__ == "__main__":
         q_process_path=VISIA_Q_PROCESS_PATH,
     )
 
-    visia_v_processed = pipeline_videos(path_to_raw_video=VISIA_V_PATH,
-                                        path_to_save_processed_video=VISIA_V_PROCESS_PATH)
+    visia_v_processed = pipeline_videos(
+        path_to_raw_video=VISIA_V_PATH, path_to_save_processed_video=VISIA_V_PROCESS_PATH
+    )
 
-    # Merge processed questionaries and videos
-    visia_qv_processed = merge_processed_qv(visia_q_processed, visia_v_processed)
+    visia_qv_processed = merge_processed_qv(
+        processed_q=visia_q_processed,
+        processed_v=visia_v_processed,
+        path_to_save=VISIA_Q_PROCESS_PATH,
+    )
