@@ -30,8 +30,7 @@ def pipeline_videos(path_to_raw_video: str, path_to_save_processed_video: str):
     for video_file_path in os.listdir(path_to_raw_video):
         video_file_path = os.path.join(path_to_raw_video, video_file_path)
         visia_video = Multimedia(
-            path_to_raw_data=video_file_path,
-            path_to_save_data=path_to_save_processed_video
+            path_to_raw_data=video_file_path, path_to_save_data=path_to_save_processed_video
         )
 
         try:
@@ -46,11 +45,15 @@ def pipeline_videos(path_to_raw_video: str, path_to_save_processed_video: str):
         except Exception as e:
             app_logger.error(f"Error processing video {video_file_path}: {e}")
 
-    df_metadata_all_videos.to_csv(os.path.join(path_to_save_processed_video, "metadata_all_videos.csv"), index=False)
+    df_metadata_all_videos.to_csv(
+        os.path.join(path_to_save_processed_video, "metadata_all_videos.csv"), index=False
+    )
     return df_metadata_all_videos
 
 
-def merge_processed_qv(processed_q: pd.DataFrame, processed_v: pd.DataFrame, path_to_save: str) -> pd.DataFrame:
+def merge_processed_qv(
+    processed_q: pd.DataFrame, processed_v: pd.DataFrame, path_to_save: str
+) -> pd.DataFrame:
     """
     This function merges the processed questionaries and videos DataFrames, calculates the number of videos, and the
     total duration of videos for each questionary.
@@ -66,10 +69,20 @@ def merge_processed_qv(processed_q: pd.DataFrame, processed_v: pd.DataFrame, pat
     :param path_to_save: The directory path where the merged DataFrame will be saved
     :return: The merged DataFrame
     """
+    # Get only videos with valid audio-duration and with ffmpeg_confidence > 0.5
+    list_with_valid_videos = processed_v[
+        (processed_v["audio-duration"] > 0) & (processed_v["ffmpeg_confidence"] > 0.5)
+    ]
     # Get the numbers of videos of id in processed_q and put 0 if there is no video
-    processed_q["video_count"] = processed_q["id"].map(processed_v["id"].value_counts()).fillna(0)
+    processed_q["video_count"] = (
+        processed_q["id"].map(list_with_valid_videos["id"].value_counts()).fillna(0)
+    )
     # Get the total duration of videos of id in processed_q
-    processed_q["video_duration"] = processed_q["id"].map(processed_v.groupby("id")["audio-duration"].sum()).fillna(0)
+    processed_q["video_duration"] = (
+        processed_q["id"]
+        .map(list_with_valid_videos.groupby("id")["audio-duration"].sum())
+        .fillna(0)
+    )
 
     processed_q.to_csv(os.path.join(path_to_save, "VISIA_QV_CRD.csv"), index=False)
     return processed_q
