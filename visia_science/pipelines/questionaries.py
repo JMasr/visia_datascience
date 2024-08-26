@@ -240,7 +240,34 @@ def visia_questionaries_pipeline(exp_name: str, q_path: str, config_path: str, q
 
     :param exp_name: The name of the experiment
     :param q_path: The path where the raw questionaries are stored
-    :param config_path: The path to the configuration file containing metadata
+    :param config_path: The path to the configuration file. Accepts a JSON file with the format:
+        Example
+        -------
+        {
+            "QUESTIONARIES CORPUS":
+            {
+                "QUESTIONARY OBJECT NAME":
+                {
+                    "q_name": "questionary_name",
+                    "q_file": "questionary_file.csv",
+                    "column_with_id": "column_name_with_id",
+                    "column_with_date": "column_name_with_datatime",
+                    "columns_with_items":
+                        [
+                            "Question1",
+                            "Sex",
+                            "Age",
+                            "How often do you exercise?",
+                        ],
+                    "columns_with_scores":
+                        [
+                            "Score1",
+                            "Body Mass Index",
+                        ]
+                    "q_url": "https://url_to_questionary_file
+                }
+            }
+        }
     :param q_process_path: The path where processed questionaries will be saved.
     :return: a df containing the integrated questionaries and patient data.
     """
