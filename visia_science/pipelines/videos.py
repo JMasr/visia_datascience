@@ -49,6 +49,11 @@ def pipeline_videos(path_to_raw_video: str, path_to_save_processed_video: str):
         except Exception as e:
             app_logger.error(f"Error processing video {video_file_path}: {e}")
 
+        # Clean Up
+        del visia_video
+
+    # Save the metadata of all videos to a CSV file
+    os.makedirs(path_to_save_processed_video, exist_ok=True)
     df_metadata_all_videos.to_csv(
         os.path.join(path_to_save_processed_video, "metadata_all_videos.csv"), index=False
     )
