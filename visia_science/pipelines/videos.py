@@ -12,6 +12,10 @@ def pipeline_videos(path_to_raw_video: str, path_to_save_processed_video: str):
     This function processes all video files in a specified directory, extracts their metadata,
     and saves the combined metadata to a CSV file.
 
+    Important Cases:
+     1. Corrupted Video Files: If the video file is empty, the function will insert a row with the video file path with
+      the metadata available, the confidence, and video/audio duration as 0.
+
     Flow
     ----
     1. Initialize an empty DataFrame to store metadata for all videos.
