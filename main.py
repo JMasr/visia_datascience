@@ -32,7 +32,6 @@ if __name__ == "__main__":
     )
 
     app_logger.info("Starting video pipeline")
-    # TODO: Test the pipeline_videos function when there are videos corrupted or empty
     visia_v_processed = pipeline_videos(
         path_to_raw_video=VISIA_V_PATH, path_to_save_processed_video=VISIA_V_PROCESS_PATH
     )
@@ -43,3 +42,4 @@ if __name__ == "__main__":
         processed_v=visia_v_processed,
         path_to_save=VISIA_Q_PROCESS_PATH,
     )
+    app_logger.info("Pipeline finished")
