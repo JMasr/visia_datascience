@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Tuple
 
+import ffmpeg
 import librosa
 import numpy as np
-import ffmpeg
 import pandas as pd
 import torch
 import whisper
@@ -193,7 +193,8 @@ class Multimedia(BaseModel):
             return validation_data.get("streams")[0].get("codec_type") == "video"
 
     def _standardize_multimedia_metadata(
-            self, input_metadata: dict,
+        self,
+        input_metadata: dict,
     ) -> dict:  # Assuming a unique stream for audio and video
         file_id = Path(input_metadata["format"]["filename"]).stem
         # Standardize metadata using ffmpeg format info
@@ -216,8 +217,10 @@ class Multimedia(BaseModel):
                 stream_processed = preprocess_video_ffmpeg_stream(stream_unk)
                 multimedia_metadata.update(stream_processed)
             else:
-                message = (f"No audio or video stream found in metadata."
-                           f" Skipping stream {self.path_to_raw_data} file")
+                message = (
+                    f"No audio or video stream found in metadata."
+                    f" Skipping stream {self.path_to_raw_data} file"
+                )
                 app_logger.error(message)
 
         return multimedia_metadata
@@ -239,6 +242,25 @@ class Multimedia(BaseModel):
                 if self.is_video():
                     video_object = VideoObject(self.path_to_raw_data)
                     self.video_data = video_object.video_data
+
+            except Exception as e:
+                validation_response = BasicResponse(
+                    success=False,
+                    status_code=500,
+                    message=f"Error loading multimedia data: {e}",
+                )
+
+        return validation_response
+
+    def load_metadata(self) -> BasicResponse:
+        validation_response = self._validate_media(self.path_to_raw_data)
+        validation_response.log_response(module="Multimedia", action="LoadRawData")
+
+        if validation_response.success:
+            try:
+                self.multimedia_metadata = self._standardize_multimedia_metadata(
+                    validation_response.data
+                )
 
             except Exception as e:
                 validation_response = BasicResponse(
@@ -358,7 +380,7 @@ class Multimedia(BaseModel):
         try:
             # Get all possible metadata
             if self.multimedia_metadata is None:
-                self.load_multimedia()
+                self.load_metadata()
             if self.multimedia_metadata.get("transcription", False):
                 self.transcribe()
             if self.multimedia_metadata.get("audio-SNR(dB)", False):
