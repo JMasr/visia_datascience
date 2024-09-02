@@ -6,6 +6,7 @@
 </a>
 
 ## About
+
 Project to explore the Visia clinical try data.
 
 ## Project Organization
@@ -60,5 +61,8 @@ Project to explore the Visia clinical try data.
         └── visualize.py
 ```
 
---------
+### Requirements
+
+- Python 3.8
+- ffmpeg
 
