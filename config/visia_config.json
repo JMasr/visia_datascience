@@ -2,7 +2,7 @@
   "VISIA_Q": {
     "EBIP": {
       "q_name": "EBIP",
-      "q_file": "forminator-ebip-q-ecip-q-ov.csv",
+      "q_file": "forminator-ebip-q-ecip-q-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -31,7 +31,7 @@
     },
     "ECIP": {
       "q_name": "ECIP",
-      "q_file": "forminator-ebip-q-ecip-q-ov.csv",
+      "q_file": "forminator-ebip-q-ecip-q-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -70,7 +70,7 @@
     },
     "EUPI": {
       "q_name": "EUPI",
-      "q_file": "forminator-eupi-a-ov.csv",
+      "q_file": "forminator-eupi-a-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -96,7 +96,7 @@
     },
     "MACI-II": {
       "q_name": "MACI-II",
-      "q_file": "forminator-maci-ii-ov.csv",
+      "q_file": "forminator-maci-ii-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -125,7 +125,7 @@
     },
     "MFQ": {
       "q_name": "MFQ",
-      "q_file": "forminator-mfq-ov.csv",
+      "q_file": "forminator-mfq-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -175,7 +175,7 @@
     },
     "PAYKEL": {
       "q_name": "PAYKEL",
-      "q_file": "forminator-paykel-ov.csv",
+      "q_file": "forminator-paykel-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -197,7 +197,7 @@
     },
     "SDQ": {
       "q_name": "SDQ",
-      "q_file": "forminator-sdq-ov.csv",
+      "q_file": "forminator-sdq-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -245,7 +245,7 @@
     },
     "PREGUNTAS": {
       "q_name": "PREGUNTAS",
-      "q_file": "forminator-preguntas-ov.csv",
+      "q_file": "forminator-preguntas-4-2-ov",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [
@@ -259,7 +259,7 @@
     },
     "VSC": {
       "q_name": "VSC",
-      "q_file": "forminator-vsc.csv",
+      "q_file": "forminator-vsc",
       "column_with_id": "crd",
       "column_with_date": "Hora de envío",
       "columns_with_items": [

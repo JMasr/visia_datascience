@@ -3,30 +3,30 @@ import os
 import pandas as pd
 
 from visia_science import app_logger
-from visia_science.data.make_dataset import download_a_single_file_from_gdrive
-from visia_science.data.patient import return_education_level, return_visia_group, return_sex, Patient
+from visia_science.data.patient import (
+    return_education_level,
+    return_visia_group,
+    return_sex,
+    Patient,
+)
 from visia_science.data.questionary import VisiaQuestionary
 from visia_science.files import load_json_as_dict
 
 
-def pipeline_get_visia_q(q_path: str, config_path: str, q_process_path: str) -> list:
+def pipeline_get_visia_q(
+    q_path: str, config_path: str, q_process_path: str, q_corpus_name: str = "VISIA_Q"
+) -> list:
     visia_metadata: dict = load_json_as_dict(config_path)
-    visia_q_metadata = visia_metadata.get("VISIA_Q")
+    visia_q_metadata = visia_metadata.get(q_corpus_name)
 
     # Download data
     questionaries = []
     for questionary in visia_q_metadata.keys():
-        raw_data_url = visia_q_metadata[questionary]["q_url"]
-        raw_data_path = os.path.join(q_path, visia_q_metadata[questionary]["q_file"])
-        is_file_download = download_a_single_file_from_gdrive(
-            gdrive_url=raw_data_url, output_path=raw_data_path
-        )
-
-        if not is_file_download:
-            raise ValueError(f"Failed to download {questionary} from {raw_data_url}")
+        q_file_to_search = os.path.join(q_path, visia_q_metadata[questionary]["q_file"])
 
         visia_q = VisiaQuestionary(
-            path_to_raw_data=raw_data_path,
+            q_file_name_to_search=q_file_to_search,
+            path_to_load_data=q_path,
             path_to_save_data=q_process_path,
             q_name=visia_q_metadata[questionary]["q_name"],
             column_with_id=visia_q_metadata[questionary]["column_with_id"],
@@ -111,12 +111,14 @@ def pipeline_get_visia_patients(visia_q_with_patients: VisiaQuestionary) -> dict
         clinical_group = return_visia_group(row["Grupo clínico"])
         biological_sex = return_sex(row["Sexo (biológico)"])
         saliva_sample = True if row["Checkbox"] == "saliva" else False
+        city = row["Ciudad"]
 
         df_patient.loc[index, "Edad"] = age
         df_patient.loc[index, "Nivel educativo"] = lv_education
         df_patient.loc[index, "Grupo clínico"] = clinical_group
         df_patient.loc[index, "Sexo (biológico)"] = biological_sex
         df_patient.loc[index, "Checkbox"] = saliva_sample
+        df_patient.loc[index, "Ciudad"] = city
 
         visia_patient = Patient(
             id=row[visia_q_with_patients.column_with_id],
@@ -124,6 +126,7 @@ def pipeline_get_visia_patients(visia_q_with_patients: VisiaQuestionary) -> dict
             sex=biological_sex,
             education_level=lv_education,
             clinical_group=clinical_group,
+            city=city,
             diagnosis=row["Diagnóstico"],
             treatment=row["Tratamiento"],
             saliva_sample=saliva_sample,
@@ -136,7 +139,8 @@ def pipeline_get_visia_patients(visia_q_with_patients: VisiaQuestionary) -> dict
 
 
 def integrate_questionaries_with_patients(
-        patients_with_interest: dict, questionaries_with_interest: dict) -> pd.DataFrame:
+    patients_with_interest: dict, questionaries_with_interest: dict
+) -> pd.DataFrame:
     """
     This function integrates patient data with their corresponding questionnaire responses into a single DataFrame.
     It processes each patient's data and their responses, merges them,
@@ -205,8 +209,8 @@ def integrate_questionaries_with_patients(
 
     # Remove all the duplicated columns
     df_patient_with_all_responses = df_patient_with_all_responses.loc[
-                                    :, ~df_patient_with_all_responses.columns.duplicated()
-                                    ]
+        :, ~df_patient_with_all_responses.columns.duplicated()
+    ]
 
     # Replace all the NaN values in a string column with "No answer"
     for column in df_patient_with_all_responses.columns:
@@ -224,7 +228,13 @@ def integrate_questionaries_with_patients(
     return df_patient_with_all_responses
 
 
-def visia_questionaries_pipeline(exp_name: str, q_path: str, config_path: str, q_process_path: str):
+def visia_questionaries_pipeline(
+    exp_name: str,
+    q_path: str,
+    config_path: str,
+    q_process_path: str,
+    q_corpus_name: str = "VISIA_Q",
+) -> pd.DataFrame:
     """
     This function orchestrates the entire pipeline for processing Visia questionaries.
     It downloads, cleans, and enriches the questionaries, extracts patient data, and integrates the questionaries with
@@ -269,12 +279,16 @@ def visia_questionaries_pipeline(exp_name: str, q_path: str, config_path: str, q
             }
         }
     :param q_process_path: The path where processed questionaries will be saved.
+    :param q_corpus_name: The name of the questionaries corpus in the configuration file.
     :return: a df containing the integrated questionaries and patient data.
     """
     try:
         # Get questionaries
         visia_questionaries: list = pipeline_get_visia_q(
-            q_path=q_path, config_path=config_path, q_process_path=q_process_path
+            q_path=q_path,
+            config_path=config_path,
+            q_process_path=q_process_path,
+            q_corpus_name=q_corpus_name,
         )
         # Clean questionaries
         visia_questionaries: dict = pipeline_clean_visia_q(visia_questionaries)
@@ -285,8 +299,8 @@ def visia_questionaries_pipeline(exp_name: str, q_path: str, config_path: str, q
         visia_all_patients: dict = pipeline_get_visia_patients(visia_q_patients)
         # Integrate questionaries with patients
         visia_patient_with_all_responses = integrate_questionaries_with_patients(
-            visia_all_patients,
-            visia_questionaries)
+            visia_all_patients, visia_questionaries
+        )
         # Save the processed questionaries
         path_to_save = os.path.join(q_process_path, f"{exp_name}_Q_CRDs.csv")
         visia_patient_with_all_responses.to_csv(path_to_save, index=False)

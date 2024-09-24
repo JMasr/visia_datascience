@@ -13,7 +13,8 @@ SUPPORTED_QUESTIONARIES_EXTENSIONS = [".csv"]
 
 
 class BaseQuestionary(BaseModel):
-    path_to_raw_data: Path
+    q_file_name_to_search: Path
+    path_to_load_data: Path = None
     path_to_save_data: Path = None
 
     q_name: str
@@ -22,8 +23,8 @@ class BaseQuestionary(BaseModel):
     columns_with_items: list
     columns_with_scores: list
 
-    df_raw_data: pd.DataFrame = None
-    df_post_processed_data: pd.DataFrame = None
+    df_raw_data: pd.DataFrame = pd.DataFrame()
+    df_post_processed_data: pd.DataFrame = pd.DataFrame()
 
     class Config:
         arbitrary_types_allowed = True
@@ -34,9 +35,9 @@ class BaseQuestionary(BaseModel):
 
         # Remove columns that are not in columns_with_items or columns_with_scores
         columns_to_keep = (
-                self.columns_with_items
-                + self.columns_with_scores
-                + [self.column_with_id, self.column_with_date]
+            self.columns_with_items
+            + self.columns_with_scores
+            + [self.column_with_id, self.column_with_date]
         )
         columns_to_drop = [
             col for col in df_with_desired_columns.columns if col not in columns_to_keep
@@ -54,20 +55,24 @@ class BaseQuestionary(BaseModel):
             loading_arguments = {}
 
         try:
-            if self.path_to_raw_data.suffix == ".csv":
-                self.df_raw_data = pd.read_csv(self.path_to_raw_data, **loading_arguments)
-            else:
-                message = (
-                    f"Unsupported extension {self.path_to_raw_data.suffix}."
-                    f" Supported extensions are: {SUPPORTED_QUESTIONARIES_EXTENSIONS}"
-                )
-                app_logger.error(message)
-                raise QuestionaryError(
-                    message,
-                    error_type="UnsupportedExtensionError",
-                )
+            for file_name in self.path_to_load_data.glob(f"*{self.q_file_name_to_search.name}*"):
+                if file_name.suffix == ".csv":
+                    df_file_data = pd.read_csv(file_name, **loading_arguments)
+                    self.df_raw_data = pd.concat(
+                        [df_file_data, self.df_raw_data], ignore_index=True, sort=False
+                    )
+                else:
+                    message = (
+                        f"Unsupported extension {self.q_file_name_to_search.suffix}."
+                        f" Supported extensions are: {SUPPORTED_QUESTIONARIES_EXTENSIONS}"
+                    )
+                    app_logger.error(message)
+                    raise QuestionaryError(
+                        message,
+                        error_type="UnsupportedExtensionError",
+                    )
         except Exception as e:
-            message = f"Error while reading file {self.path_to_raw_data}: {e}"
+            message = f"Error while reading file {self.q_file_name_to_search}: {e}"
             app_logger.error(message)
             raise QuestionaryError(
                 message,
@@ -78,14 +83,14 @@ class BaseQuestionary(BaseModel):
 
     @staticmethod
     def _standardize_datetime(
-            date_string: str, month_mapping: dict, date_time_format: str
+        date_string: str, month_mapping: dict, date_time_format: str
     ) -> datetime:
         date_string_desire = date_string.replace(date_string[:3], month_mapping[date_string[:3]])
         date_object = datetime.strptime(date_string_desire, date_time_format)
         return date_object
 
     def _standardize_date_column_to_datetime(
-            self, df_with_dates: pd.DataFrame, month_mapping: dict, date_time_format: str
+        self, df_with_dates: pd.DataFrame, month_mapping: dict, date_time_format: str
     ) -> pd.DataFrame:
         for index, date_string in df_with_dates[self.column_with_date].items():
             date_object = self._standardize_datetime(date_string, month_mapping, date_time_format)
@@ -112,7 +117,7 @@ class BaseQuestionary(BaseModel):
         return df_with_empty_values
 
     def _remove_entries_from_a_given_date(
-            self, df_with_q: pd.DataFrame, column_with_date: str = None, date: str = None
+        self, df_with_q: pd.DataFrame, column_with_date: str = None, date: str = None
     ) -> pd.DataFrame:
         if column_with_date is None:
             column_with_date = self.column_with_date
@@ -126,7 +131,7 @@ class BaseQuestionary(BaseModel):
         return df_with_q
 
     def remove_entries_that_dont_match_a_given_id_format(
-            self, df_with_q: pd.DataFrame, column_with_id: str = None, id_formats: list = None
+        self, df_with_q: pd.DataFrame, column_with_id: str = None, id_formats: list = None
     ) -> pd.DataFrame:
         if column_with_id is None:
             column_with_id = self.column_with_id
@@ -243,6 +248,7 @@ class BaseQuestionary(BaseModel):
 class VisiaQuestionary(BaseQuestionary):
     ID_WITH_WRONG_FORMAT: dict = None
 
+    ID_FORMAT: list = ["CUNQ-", "CHUO0", "OU-"]
     DATE_TIME_FORMAT: str = "%b %d, %Y @ %I:%M %p"
     MONTH_MAPPING_ENG_SP: dict = {
         "Jan": "Ene",
@@ -268,8 +274,7 @@ class VisiaQuestionary(BaseQuestionary):
 
     def _load_json_with_wrong_ids(self) -> dict:
         path_to_ids_with_wrong_format = os.path.join(
-            os.path.dirname(self.path_to_raw_data),
-            "visia_ids_with_wrong_format.json"
+            os.path.dirname(self.q_file_name_to_search), "visia_ids_with_wrong_format.json"
         )
 
         try:
@@ -286,16 +291,18 @@ class VisiaQuestionary(BaseQuestionary):
 
         return dict_with_wrong_ids
 
-    def _standardize_ids(self, df_with_ids, id_examples: str = "CUNQ-0"):
+    def _standardize_ids(self, df_with_ids, id_examples: list = None):
+        if id_examples is None:
+            id_examples = ["CUNQ-0", "CHOU-0", "OU-0"]
+
         self.ID_WITH_WRONG_FORMAT = self._load_json_with_wrong_ids()
 
         # Check if the IDs are in the correct format
         path_to_ids_with_wrong_format = os.path.join(
-            os.path.dirname(self.path_to_raw_data),
-            "visia_ids_with_wrong_format.json"
+            os.path.dirname(self.q_file_name_to_search), "visia_ids_with_wrong_format.json"
         )
         for index, raw_id in df_with_ids[self.column_with_id].items():
-            if not raw_id.startswith(id_examples):
+            if not any([example in raw_id for example in id_examples]):
                 # Check if the ID is already in the wrong format
                 if raw_id in self.ID_WITH_WRONG_FORMAT:
                     correct_id = self.ID_WITH_WRONG_FORMAT[raw_id]
@@ -318,6 +325,47 @@ class VisiaQuestionary(BaseQuestionary):
                 df_with_ids.loc[index, self.column_with_id] = f"{correct_id}"
         return df_with_ids
 
+    def _ad_hoc_cleaning(self, df_with_q: pd.DataFrame) -> pd.DataFrame:
+        """
+        Ad-hoc cleaning of the questionary data using the following steps:
+            - CHUO-013: Change the birthdate from *10/03/2022* to 10/03/2012 (Error of annotation)
+            - CHUO-005: Duplication of record.
+                        CHUO-005 of 23/02/2024 is the real one
+                        CHUO-005 of 27/02/2024 is the missing CHUO-006 (Error of annotation)
+        :param df_with_q:
+        :return:
+        """
+        app_logger.warning("Questionary - Starting ad-hoc cleaning")
+        app_logger.info(
+            "Ad-hoc cleaning of the questionary data using the following steps:"
+            "- CHUO-013: Change the birthdate from *10/03/2022* to 10/03/2012 (Error of annotation)"
+            "- CHUO-005: Duplication of record."
+            "            * CHUO-005 of 23/02/2024 is the real one"
+            "            * CHUO-005 of 27/02/2024 is the missing CHUO-006 (Error of annotation)"
+        )
+
+        # Check if the questionary has the column "Fecha de nacimiento"
+        if "Fecha de nacimiento" in df_with_q.columns:
+            df_with_q.loc[df_with_q[self.column_with_id] == "CHUO-013", "Fecha de nacimiento"] = (
+                "10/03/2012"
+            )
+
+            # Adding city data to the patient enrollment questionary
+            df_with_q["Ciudad"] = df_with_q[self.column_with_id].apply(
+                lambda x: "Vigo" if "CUNQ-" in x else "Ourense"
+            )
+
+        target_date_std = datetime.strptime("2024-02-24 00:00:00", "%Y-%m-%d %H:%M:%S")
+        df_with_q.loc[
+            (
+                (df_with_q[self.column_with_date] > target_date_std)
+                & (df_with_q[self.column_with_id] == "CHUO-005")
+            ),
+            self.column_with_id,
+        ] = "CHUO-006"
+
+        return df_with_q
+
     def clean(self):
         self.create_simple_post_processed_if_dont_exits()
 
@@ -329,18 +377,17 @@ class VisiaQuestionary(BaseQuestionary):
 
         df_ = self._standardize_empty_values(df_)
 
-        df_ = self._remove_entries_from_a_given_date(df_, date="2024-02-22 00:00:00")
+        df_ = self._remove_entries_from_a_given_date(df_, date="2024-02-05 00:00:00")
 
-        df_ = self.remove_entries_that_dont_match_a_given_id_format(
-            df_, id_formats=["CUNQ-", "CHOX-"]
-        )
+        df_ = self.remove_entries_that_dont_match_a_given_id_format(df_, id_formats=self.ID_FORMAT)
 
         df_ = self._standardize_ids(df_)
+
+        df_ = self._ad_hoc_cleaning(df_)
 
         self.df_post_processed_data = df_
 
     def get_all_the_responses_of_one_patient(self, id_patient: str):
         return self.df_post_processed_data[
             self.df_post_processed_data[self.column_with_id] == id_patient
-            ]
-
+        ]
